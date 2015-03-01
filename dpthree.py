@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import
 
 __all__ = ('ascii', 'filter', 'hex', 'map', 'oct', 'zip', 'input',
            'bytes', 'str', 'unicode', 'basestring', 'range', 'xrange',
-           'reduce')
+           'reduce', 'input', 'raw_input')
 
 import sys
 import warnings

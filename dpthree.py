@@ -28,9 +28,9 @@ reduce has been moved to the functools module in Python 3
 """
 from __future__ import print_function, absolute_import
 
-__all__ = ('ascii', 'filter', 'hex', 'map', 'oct', 'zip', 'input',
-           'bytes', 'str', 'unicode', 'basestring', 'range', 'xrange',
-           'reduce', 'input', 'raw_input', 'chr', 'unichr')
+__all__ = ('ascii', 'filter', 'hex', 'map', 'oct', 'zip',
+           'bytes', 'str', 'basestring', 'range', 'input', 'chr', 'unicode',
+           'xrange', 'reduce', 'raw_input', 'unichr')
 
 import sys
 import warnings
@@ -40,10 +40,10 @@ PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
 
 
-def py3_warn(f, name=None, msg=None, cat=DeprecationWarning):
+def func_warn(f, name=None, msg=None, cat=DeprecationWarning):
     """Wrap callables with a deprecation warning."""
     name = name if name is not None else f.__name__
-    wrnmsg = ('The builtin function/class "{name}" is removed in Python 3 and '
+    wrnmsg = ('The builtin callable "{name}" is removed in Python 3 and '
               'should no longer be used.'.format(name=name))
 
     wrnmsg = wrnmsg if msg is None else msg.format(name=name)
@@ -88,9 +88,9 @@ else:
 _kldgmsg = ('The function/class "{name}" exists in neither versions 2 or 3 of '
             'Python. It is merely a kludge to help cover up differences '
             'between the two versions.')
-unicode = py3_warn(str, 'unicode')
-xrange = py3_warn(range, 'xrange')
-reduce = py3_warn(functools.reduce, 'reduce')
-raw_input = py3_warn(input, 'raw_input')
-unichr = py3_warn(chr, 'unichr')
-bytechr = py3_warn(bytechr, name='bytechar', msg=_kldgmsg)
+unicode = func_warn(str, 'unicode')
+xrange = func_warn(range, 'xrange')
+reduce = func_warn(functools.reduce, 'reduce')
+raw_input = func_warn(input, 'raw_input')
+unichr = func_warn(chr, 'unichr')
+bytechr = func_warn(bytechr, name='bytechar', msg=_kldgmsg)

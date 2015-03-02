@@ -43,8 +43,8 @@ PY3 = sys.version_info[0] == 3
 def py3_warn(f, name=None, msg=None, cat=DeprecationWarning):
     """Wrap callables with a deprecation warning."""
     name = name if name is not None else f.__name__
-    wrnmsg = ('The function/class "{name}" is removed in Python 3 and should '
-              'no longer be used.'.format(name=name))
+    wrnmsg = ('The builtin function/class "{name}" is removed in Python 3 and '
+              'should no longer be used.'.format(name=name))
 
     wrnmsg = wrnmsg if msg is None else msg.format(name=name)
 
@@ -70,7 +70,6 @@ else:
     basestring = (str, bytes)
     range = range
     input = input
-    chr = chr
 
     def bytechr(i):
         """Return bytestring of one character with ordinal i; 0 <= i < 256."""
@@ -80,6 +79,8 @@ else:
             else:
                 raise ValueError('bytechr() arg not in range(256)')
         return chr(i).encode('latin1')
+
+    chr = chr
 
 # code for both versions of Python
 # These work for both since we have already redifined the input callables to

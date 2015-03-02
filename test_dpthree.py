@@ -6,6 +6,7 @@ import warnings
 
 import dpthree
 from dpthree import *
+from dpthree import bytechr
 
 try:
     import unittest2 as unittest
@@ -21,17 +22,38 @@ class TestDpthree(unittest.TestCase):
         warnings.simplefilter('error', DeprecationWarning)
 
     def test_warnings(self):
-        with self.assertRaises(DeprecationWarning):
+        with self.assertRaises(Warning):
             unicode('unicode')
 
-        with self.assertRaises(DeprecationWarning):
+        with self.assertRaises(Warning):
             xrange(10)
 
-        with self.assertRaises(DeprecationWarning):
-            reduce([1, 2, 3, 4, 5])
+        with self.assertRaises(Warning):
+            try:
+                reduce([1, 2, 3, 4, 5])
+            except Exception as e:
+                print(e, file=sys.stderr)
+                raise
 
-        with self.assertRaises(DeprecationWarning):
+        with self.assertRaises(Warning):
             raw_input('-> ')
+
+        with self.assertRaises(Warning):
+            try:
+                unichr(6000)
+            except Exception as e:
+                print(e, file=sys.stderr)
+                raise
+
+        with self.assertRaises(Warning):
+            try:
+                bytechr(128)
+            except Exception as e:
+                print(e, file=sys.stderr)
+                raise
+
+    def test_results(self):
+        pass
 
     def test_names(self):
         if dpthree.PY2:
@@ -42,6 +64,10 @@ class TestDpthree(unittest.TestCase):
             self.assertEqual(range.__name__, 'xrange')
             self.assertEqual(raw_input.__name__, 'raw_input')
 
+            self.assertEqual(bytechr.__name__, 'chr')
+            self.assertEqual(chr.__name__, 'unichr')
+            self.assertEqual(unichr.__name__, 'unichr')
+
         if dpthree.PY3:
             self.assertEqual(unicode.__name__, 'str')
             self.assertEqual(str.__name__, 'str')
@@ -50,14 +76,12 @@ class TestDpthree(unittest.TestCase):
             self.assertEqual(xrange.__name__, 'range')
             self.assertEqual(raw_input.__name__, 'input')
 
+            self.assertEqual(bytechr.__name__, 'bytechr')
+            self.assertEqual(chr.__name__, 'chr')
+            self.assertEqual(unichr.__name__, 'chr')
+
     def tearDown(self):
         self.catcher.__exit__(None, None, None)
 
-
-def test(*args, **kwargs):
-    print('testing!')
-    print(unicode('unicode'))
-
 if __name__ == '__main__':
-    # test()
-    unittest.main(verbosity=2)
+    unittest.main()

@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import
 
 __all__ = ('ascii', 'filter', 'hex', 'map', 'oct', 'zip', 'input',
            'bytes', 'str', 'unicode', 'basestring', 'range', 'xrange',
-           'reduce', 'input', 'raw_input')
+           'reduce', 'input', 'raw_input', 'chr', 'unichr')
 
 import sys
 import warnings
@@ -40,15 +40,17 @@ PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
 
 
-def py3_warn(f, name=None):
+def py3_warn(f, name=None, msg=None, cat=DeprecationWarning):
     """Wrap callables with a deprecation warning."""
     name = name if name is not None else f.__name__
+    wrnmsg = ('The function/class "{name}" is removed in Python 3 and should '
+              'no longer be used.'.format(name=name))
+
+    wrnmsg = wrnmsg if msg is None else msg.format(name=name)
 
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
-        warnings.warn('The function/class "{0}" is removed in Python 3 and '
-                      'should no longer be used.'.format(name),
-                      DeprecationWarning, stacklevel=2)
+        warnings.warn(wrnmsg, cat, stacklevel=2)
         return f(*args, **kwargs)
     return wrapper
 
@@ -59,6 +61,8 @@ if PY2:
     basestring = basestring
     range = xrange
     input = raw_input
+    bytechr = chr
+    chr = unichr
 else:
     from builtins import ascii, filter, hex, map, oct, zip
     bytes = bytes
@@ -66,11 +70,26 @@ else:
     basestring = (str, bytes)
     range = range
     input = input
+    chr = chr
+
+    def bytechr(i):
+        """Return bytestring of one character with ordinal i; 0 <= i < 256."""
+        if not 0 <= i < 256:
+            if not isinstance(i, int):
+                raise TypeError('an integer is required')
+            else:
+                raise ValueError('bytechr() arg not in range(256)')
+        return chr(i).encode('latin1')
 
 # code for both versions of Python
-# These work for both since we have already redifined these callables to match
-# Python 3.
+# These work for both since we have already redifined the input callables to
+# match Python 3.
+_kldgmsg = ('The function/class "{name}" exists in neither versions 2 or 3 of '
+            'Python. It is merely a kludge to help cover up differences '
+            'between the two versions.')
 unicode = py3_warn(str, 'unicode')
 xrange = py3_warn(range, 'xrange')
 reduce = py3_warn(functools.reduce, 'reduce')
 raw_input = py3_warn(input, 'raw_input')
+unichr = py3_warn(chr, 'unichr')
+bytechr = py3_warn(bytechr, name='bytechar', msg=_kldgmsg)

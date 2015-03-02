@@ -67,7 +67,7 @@ def class_warn(c, subs, name=None, msg=None, cat=DeprecationWarning,
 
     def __new__(cls, *args, **kwargs):
         warnings.warn(wrnmsg, cat, stacklevel=2)
-        return super.__new__(cls, *args, **kwargs)
+        return super(cls).__new__(cls, *args, **kwargs)
 
     def __subclasshook__(cls, C):
         warnings.warn(wrnmsg, cat, stacklevel=2)

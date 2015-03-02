@@ -60,8 +60,11 @@ class TestDpthree(unittest.TestCase):
                 print(e, file=sys.stderr)
                 raise
 
-    def test_results(self):
-        pass
+    def test_inheritance(self):
+        warnings.resetwarnings()
+        # self.assertIsInstance(unicode('unicode'), str)
+        # self.assertIsInstance(str, basestring)
+        # self.assertIsInstance(bytes, basestring)
 
     def test_names(self):
         if dpthree.PY2:

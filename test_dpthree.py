@@ -23,10 +23,18 @@ class TestDpthree(unittest.TestCase):
 
     def test_warnings(self):
         with self.assertRaises(Warning):
-            unicode('unicode')
+            try:
+                unicode('unicode')
+            except Exception as e:
+                print(e, file=sys.stderr)
+                raise
 
         with self.assertRaises(Warning):
-            xrange(10)
+            try:
+                xrange(10)
+            except Exception as e:
+                print(e, file=sys.stderr)
+                raise
 
         with self.assertRaises(Warning):
             try:
@@ -69,7 +77,7 @@ class TestDpthree(unittest.TestCase):
             self.assertEqual(unichr.__name__, 'unichr')
 
         if dpthree.PY3:
-            self.assertEqual(unicode.__name__, 'str')
+            self.assertEqual(unicode.__name__, 'unicode')
             self.assertEqual(str.__name__, 'str')
             self.assertEqual(bytes.__name__, 'bytes')
 

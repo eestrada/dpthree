@@ -33,6 +33,7 @@ __all__ = ('ascii', 'filter', 'hex', 'map', 'oct', 'zip',
            'xrange', 'reduce', 'raw_input', 'unichr')
 
 import sys
+import abc
 import warnings
 import functools
 
@@ -52,13 +53,39 @@ def func_warn(f, name=None, msg=None, cat=DeprecationWarning):
     def wrapper(*args, **kwargs):
         warnings.warn(wrnmsg, cat, stacklevel=2)
         return f(*args, **kwargs)
+
     return wrapper
+
+
+def class_warn(c, subs, name=None, msg=None, cat=DeprecationWarning,
+               inherit=True):
+    name = name if name is not None else c.__name__
+    wrnmsg = ('The builtin type "{name}" is removed in Python 3 and '
+              'should no longer be used.'.format(name=name))
+
+    wrnmsg = wrnmsg if msg is None else msg.format(name=name)
+
+    def __new__(cls, *args, **kwargs):
+        warnings.warn(wrnmsg, cat, stacklevel=2)
+        return super.__new__(cls, *args, **kwargs)
+
+    def __subclasshook__(cls, C):
+        warnings.warn(wrnmsg, cat, stacklevel=2)
+        return issubclass(C, subs)
+
+    __subclasshook__ = classmethod(__subclasshook__)
+
+    attrs = dict(__new__=__new__, __subclasshook__=__subclasshook__)
+
+    truesubs = subs if inherit else (object,)
+
+    return abc.ABCMeta(name, truesubs, attrs)
 
 if PY2:
     from future_builtins import ascii, filter, hex, map, oct, zip
     bytes = str
     str = unicode
-    basestring = basestring
+    basestring = (basestring,)
     range = xrange
     input = raw_input
     bytechr = chr
@@ -88,7 +115,8 @@ else:
 _kldgmsg = ('The function/class "{name}" exists in neither versions 2 or 3 of '
             'Python. It is merely a kludge to help cover up differences '
             'between the two versions.')
-unicode = func_warn(str, 'unicode')
+unicode = class_warn(str, (str,), 'unicode')
+basestring = class_warn(str, basestring, 'basestring', inherit=False)
 xrange = func_warn(range, 'xrange')
 reduce = func_warn(functools.reduce, 'reduce')
 raw_input = func_warn(input, 'raw_input')

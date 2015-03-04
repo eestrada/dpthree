@@ -29,8 +29,8 @@ reduce has been moved to the functools module in Python 3
 from __future__ import print_function, absolute_import
 
 __all__ = ('ascii', 'filter', 'hex', 'map', 'oct', 'zip',
-           'bytes', 'str', 'basestring', 'range', 'input', 'chr', 'unicode',
-           'xrange', 'reduce', 'raw_input', 'unichr')
+           'bytes', 'str', 'basestring', 'range', 'input', 'chr',
+           'unicode', 'xrange', 'reduce', 'raw_input', 'unichr')
 
 import sys
 import abc
@@ -57,35 +57,38 @@ def func_warn(f, name=None, msg=None, cat=DeprecationWarning):
     return wrapper
 
 
-def class_warn(c, subs, name=None, msg=None, cat=DeprecationWarning,
-               inherit=True):
-    name = name if name is not None else c.__name__
-    wrnmsg = ('The builtin type "{name}" is removed in Python 3 and '
-              'should no longer be used.'.format(name=name))
+def class_warn(return_type, subs=None, name=None, msg=None,
+               cat=DeprecationWarning):
+    subs = (return_type,) if subs is None else subs
 
-    wrnmsg = wrnmsg if msg is None else msg.format(name=name)
+    name = name if name is not None else return_type.__name__
+    wrnmsg = ('The builtin type "{name}" is removed in Python 3 and '
+              'should no longer be used.')
+
+    wrnmsg = wrnmsg if msg is None else msg
+    wrnmsg = wrnmsg.format(name=name)
 
     def __new__(cls, *args, **kwargs):
+        """Use as factory function for real underlying type."""
         warnings.warn(wrnmsg, cat, stacklevel=2)
-        return super(cls).__new__(cls, *args, **kwargs)
+        return return_type(*args, **kwargs)
 
     def __subclasshook__(cls, C):
-        warnings.warn(wrnmsg, cat, stacklevel=2)
+        """Check inheritance against real underlying type(s)."""
+        warnings.warn(wrnmsg, cat, stacklevel=4)
         return issubclass(C, subs)
 
     __subclasshook__ = classmethod(__subclasshook__)
 
     attrs = dict(__new__=__new__, __subclasshook__=__subclasshook__)
 
-    truesubs = subs if inherit else (object,)
-
-    return abc.ABCMeta(name, truesubs, attrs)
+    return abc.ABCMeta(name, (object,), attrs)
 
 if PY2:
     from future_builtins import ascii, filter, hex, map, oct, zip
     bytes = str
     str = unicode
-    basestring = (basestring,)
+    _bs_subs = (basestring,)
     range = xrange
     input = raw_input
     bytechr = chr
@@ -94,7 +97,7 @@ else:
     from builtins import ascii, filter, hex, map, oct, zip
     bytes = bytes
     str = str
-    basestring = (str, bytes)
+    _bs_subs = (str, bytes)
     range = range
     input = input
 
@@ -115,9 +118,14 @@ else:
 _kldgmsg = ('The function/class "{name}" exists in neither versions 2 or 3 of '
             'Python. It is merely a kludge to help cover up differences '
             'between the two versions.')
-unicode = class_warn(str, (str,), 'unicode')
-basestring = class_warn(str, basestring, 'basestring', inherit=False)
-xrange = func_warn(range, 'xrange')
+
+
+def _bs_raise(*args, **kwargs):
+    raise TypeError('The basestring type cannot be instantiated')
+
+unicode = class_warn(str, name='unicode')
+basestring = class_warn(_bs_raise, subs=_bs_subs, name='basestring')
+xrange = class_warn(range, name='xrange')
 reduce = func_warn(functools.reduce, 'reduce')
 raw_input = func_warn(input, 'raw_input')
 unichr = func_warn(chr, 'unichr')

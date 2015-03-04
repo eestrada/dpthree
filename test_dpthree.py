@@ -14,33 +14,39 @@ except:
     import unittest
 
 
-class TestDpthree(unittest.TestCase):
+class Test_dpthree(unittest.TestCase):
     def setUp(self):
         self.catcher = warnings.catch_warnings()
         self.catcher.__enter__()
-        warnings.resetwarnings()
-        warnings.simplefilter('error', DeprecationWarning)
+        try:
+            warnings.resetwarnings()
+            warnings.simplefilter('ignore', DeprecationWarning)
+        except:
+            self.catcher.__exit__(None, None, None)
+            raise
 
     def test_warnings(self):
+        warnings.simplefilter('error', DeprecationWarning)
+
         with self.assertRaises(Warning):
             try:
                 unicode('unicode')
             except Exception as e:
-                print(e, file=sys.stderr)
+                # print(e, file=sys.stderr)
                 raise
 
         with self.assertRaises(Warning):
             try:
                 xrange(10)
             except Exception as e:
-                print(e, file=sys.stderr)
+                # print(e, file=sys.stderr)
                 raise
 
         with self.assertRaises(Warning):
             try:
                 reduce([1, 2, 3, 4, 5])
             except Exception as e:
-                print(e, file=sys.stderr)
+                # print(e, file=sys.stderr)
                 raise
 
         with self.assertRaises(Warning):
@@ -50,21 +56,52 @@ class TestDpthree(unittest.TestCase):
             try:
                 unichr(6000)
             except Exception as e:
-                print(e, file=sys.stderr)
+                # print(e, file=sys.stderr)
                 raise
 
         with self.assertRaises(Warning):
             try:
                 bytechr(128)
             except Exception as e:
-                print(e, file=sys.stderr)
+                # print(e, file=sys.stderr)
                 raise
 
+    def test_bytechr(self):
+        with self.assertRaises(TypeError):
+            bytechr('a string')  # should only accept integers
+
+        with self.assertRaises(ValueError):
+            bytechr(256)  # should be too large a value
+
+        self.assertIsInstance(bytechr(0), bytes)  # only return byte strings
+
+        for i in range(256):
+            self.assertEqual(len(bytechr(i)), 1)
+
+    def test_basestring(self):
+        with self.assertRaises(TypeError):
+            basestring()
+
+        with self.assertRaises(TypeError):
+            basestring('arg')
+
+        with self.assertRaises(TypeError):
+            basestring(key='value')
+
     def test_inheritance(self):
-        warnings.resetwarnings()
-        # self.assertIsInstance(unicode('unicode'), str)
-        # self.assertIsInstance(str, basestring)
-        # self.assertIsInstance(bytes, basestring)
+        self.assertIsInstance(unicode('unicode'), str)
+        self.assertIsInstance('unicode string', unicode)
+
+        self.assertIsInstance(bytes(), bytes)
+        self.assertIsInstance(b'byte string', bytes)
+
+        self.assertIsInstance(str(), basestring)
+        self.assertIsInstance(bytes(), basestring)
+        self.assertIsInstance('unicode string', basestring)
+        self.assertIsInstance(b'byte string', basestring)
+
+        self.assertIsInstance(xrange(1), range)
+        self.assertIsInstance(xrange(1), xrange)
 
     def test_names(self):
         if dpthree.PY2:
@@ -84,12 +121,14 @@ class TestDpthree(unittest.TestCase):
             self.assertEqual(str.__name__, 'str')
             self.assertEqual(bytes.__name__, 'bytes')
 
-            self.assertEqual(xrange.__name__, 'range')
             self.assertEqual(raw_input.__name__, 'input')
 
             self.assertEqual(bytechr.__name__, 'bytechr')
             self.assertEqual(chr.__name__, 'chr')
             self.assertEqual(unichr.__name__, 'chr')
+
+        # asserts for all versions
+        self.assertEqual(xrange.__name__, 'xrange')
 
     def tearDown(self):
         self.catcher.__exit__(None, None, None)

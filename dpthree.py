@@ -25,6 +25,9 @@ unicode has been removed in Python 3. Well, again, sort of. str in Python 3 is
 more or less what unicode was in Python 2.
 
 reduce has been moved to the functools module in Python 3
+
+basestring has been removed in Python 3 as str and bytes do not share a common
+parent. Use isinstance(obj, (str, bytes)) instead.
 """
 from __future__ import print_function, absolute_import
 
@@ -112,14 +115,14 @@ else:
 
     chr = chr
 
+
 # code for both versions of Python
 # These work for both since we have already redifined the input callables to
 # match Python 3.
-_kldgmsg = ('The function/class "{name}" exists in neither versions 2 or 3 of '
-            'Python. It is merely a kludge to help cover up differences '
-            'between the two versions.')
-
-
+# These types and callables exist in Python 2 but not in Python 3 (or, they
+# exist, but not by these names). They should be used, but can be helpful in
+# getting Python 2 code to run in Python 3 with almost no modifications. Use of
+# any of these raises a DeprecationWarning.
 def _bs_raise(*args, **kwargs):
     raise TypeError('The basestring type cannot be instantiated')
 
@@ -129,4 +132,12 @@ xrange = _class_warn(range, name='xrange')
 reduce = _func_warn(functools.reduce, 'reduce')
 raw_input = _func_warn(input, 'raw_input')
 unichr = _func_warn(chr, 'unichr')
+
+# kludges for things that have no new equivalent in Python 3.
+_kldgmsg = ('The function/class "{name}" exists in neither versions 2 or 3 of '
+            'Python. It is merely a kludge to help cover up differences '
+            'between the two versions.')
+
+# since chr now only works with unicode, this callable gives the Python 2
+# behavior of chr
 bytechr = _func_warn(bytechr, name='bytechar', msg=_kldgmsg)

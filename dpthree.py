@@ -41,7 +41,7 @@ PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
 
 
-def func_warn(f, name=None, msg=None, cat=DeprecationWarning):
+def _func_warn(f, name=None, msg=None, cat=DeprecationWarning):
     """Wrap callables with a deprecation warning."""
     name = name if name is not None else f.__name__
     wrnmsg = ('The builtin callable "{name}" is removed in Python 3 and '
@@ -57,8 +57,8 @@ def func_warn(f, name=None, msg=None, cat=DeprecationWarning):
     return wrapper
 
 
-def class_warn(return_type, subs=None, name=None, msg=None,
-               cat=DeprecationWarning):
+def _class_warn(return_type, subs=None, name=None, msg=None,
+                cat=DeprecationWarning):
     subs = (return_type,) if subs is None else subs
 
     name = name if name is not None else return_type.__name__
@@ -123,10 +123,10 @@ _kldgmsg = ('The function/class "{name}" exists in neither versions 2 or 3 of '
 def _bs_raise(*args, **kwargs):
     raise TypeError('The basestring type cannot be instantiated')
 
-unicode = class_warn(str, name='unicode')
-basestring = class_warn(_bs_raise, subs=_bs_subs, name='basestring')
-xrange = class_warn(range, name='xrange')
-reduce = func_warn(functools.reduce, 'reduce')
-raw_input = func_warn(input, 'raw_input')
-unichr = func_warn(chr, 'unichr')
-bytechr = func_warn(bytechr, name='bytechar', msg=_kldgmsg)
+unicode = _class_warn(str, name='unicode')
+basestring = _class_warn(_bs_raise, subs=_bs_subs, name='basestring')
+xrange = _class_warn(range, name='xrange')
+reduce = _func_warn(functools.reduce, 'reduce')
+raw_input = _func_warn(input, 'raw_input')
+unichr = _func_warn(chr, 'unichr')
+bytechr = _func_warn(bytechr, name='bytechar', msg=_kldgmsg)

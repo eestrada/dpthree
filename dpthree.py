@@ -120,8 +120,8 @@ else:
 # These work for both since we have already redifined the input callables to
 # match Python 3.
 # These types and callables exist in Python 2 but not in Python 3 (or, they
-# exist, but not by these names). They should be used, but can be helpful in
-# getting Python 2 code to run in Python 3 with almost no modifications. Use of
+# exist, but not by these names). They shouldn't be used, but can be helpful in
+# getting Python 2 code to run in Python 3 with fewer modifications. Use of
 # any of these raises a DeprecationWarning.
 def _bs_raise(*args, **kwargs):
     raise TypeError('The basestring type cannot be instantiated')
@@ -141,3 +141,73 @@ _kldgmsg = ('The function/class "{name}" exists in neither versions 2 or 3 of '
 # since chr now only works with unicode, this callable gives the Python 2
 # behavior of chr
 bytechr = _func_warn(bytechr, name='bytechar', msg=_kldgmsg)
+
+_name_map = {'builtins': '__builtin__',
+             'winreg': '_winreg',
+             'configparser': 'ConfigParser',
+             'copyreg': 'copy_reg',
+             'queue': 'Queue',
+             'socketserver': 'SocketServer',
+             '_markupbase': 'markupbase',
+             'reprlib': 'repr',
+             'test.support': 'test.test_support',
+             'tkinter': 'Tkinter'}
+
+
+def _load_tk():
+    old = ('ScrolledText', 'tkColorChooser', 'tkCommonDialog', 'tkFileDialog',
+           'tkFont', 'tkMessageBox', 'tkSimpleDialog', 'Tkdnd', 'ttk', 'Tix')
+    new = ('scrolledtext', 'colorchooser', 'commondialog', 'filedialog',
+           'font', 'messagebox', 'simpledialog', 'dnd', 'ttk', 'tix')
+
+    mod = __import__('Tkinter', level=0)
+    sys.modules.pop('Tkinter')
+    for old, new in zip(old, new):
+        setattr(mod, new, __import__(old, level=0))
+
+    return mod
+
+
+def _load_dbm():
+    mod = __import__('anydbm', level=0)
+    sys.modules.pop('anydbm')
+
+    if sys.modules['dbm'] == mod:  # we've done this before
+        return mod
+
+    old = ('dbm', 'gdbm', 'dumbdbm', 'whichdb')
+    new = ('ndbm', 'gnu', 'dumb', 'whichdb')
+    attr = (None, None, None, 'whichdb')
+
+    for old, new, attr in zip(old, new, attr):
+        old = __import__(old, level=0)
+        if attr is not None:
+            old = getattr(old, attr)
+        setattr(mod, new, old)
+
+    return mod
+
+
+def loadnewname(name):
+    """Load modules by their new names."""
+    if PY2 and name in _name_map:
+        mods = sys.modules
+        sys.modules = {}
+        try:
+            if name == 'dbm':
+                mod = _load_dbm()
+            elif name == 'tkinter':
+                mod = _load_tk()
+            else:
+                mod = __import__(_name_map[name], level=0)
+            sys.modules[name] = mod
+        finally:
+            mods.update(sys.modules)
+            sys.modules = mods
+
+
+def loadallnew():
+    if PY2:
+        for new, old in _name_map:
+            mod = __import__(old, level=0)
+            sys.modules[new] = mod

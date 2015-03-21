@@ -188,7 +188,7 @@ def _load_dbm():
     return mod
 
 
-def loadnewname(name):
+def _loadnewname(name):
     """Load modules by their new names."""
     if PY2 and name in _name_map:
         mods = sys.modules
@@ -206,8 +206,7 @@ def loadnewname(name):
             sys.modules = mods
 
 
-def loadallnew():
+def loadnewnames():
     if PY2:
-        for new, old in _name_map:
-            mod = __import__(old, level=0)
-            sys.modules[new] = mod
+        for new in _name_map:
+            _loadnewname(new)

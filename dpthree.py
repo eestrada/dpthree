@@ -29,14 +29,17 @@ reduce has been moved to the functools module in Python 3
 basestring has been removed in Python 3 as str and bytes do not share a common
 parent. Use isinstance(obj, (str, bytes)) instead.
 """
-from __future__ import print_function, absolute_import
+from __future__ import print_function, absolute_import, division
 
 __all__ = ('ascii', 'filter', 'hex', 'map', 'oct', 'zip',
            'bytes', 'str', 'basestring', 'range', 'input', 'chr',
            'unicode', 'xrange', 'reduce', 'raw_input', 'unichr')
 
+# __all__ = ('builtins', 'tkinter', 'dbm', 'winreg')
+
 import sys
 import abc
+import types
 import warnings
 import functools
 
@@ -88,6 +91,33 @@ def _class_warn(return_type, subs=None, name=None, msg=None,
     return abc.ABCMeta(name, (object,), attrs)
 
 if PY2:
+    builtins = types.ModuleType('builtins', '')
+
+    import __builtin__ as past_builtins
+    for _attr in dir(past_builtins):
+        if not _attr.startswith('_'):
+            setattr(builtins, _attr, getattr(past_builtins, _attr))
+    builtins.__import__ = past_builtins.__import__
+    builtins.__doc__ = past_builtins.__doc__
+    del past_builtins
+
+    # duck punch old names that mean something different in Py3
+    for _set, _get in [('chr', 'unichr'), ('range', 'xrange'), ('bytes', 'str'), ('str', 'unicode'), ('input', 'raw_input')]:
+        setattr(builtins, _set, getattr(builtins, _get))
+
+    # attributes to flat out delete
+    for _attr in ('basestring', 'reduce', 'execfile', 'unicode', 'raw_input', 'unichr'):
+        delattr(builtins, _attr)
+
+    import future_builtins
+    for _attr in ('ascii', 'filter', 'hex', 'map', 'oct', 'zip'):
+        setattr(builtins, _attr, getattr(future_builtins, _attr))
+    del future_builtins
+
+    import io
+    builtins.open = io.open
+    del io
+
     from future_builtins import ascii, filter, hex, map, oct, zip
     bytes = str
     str = unicode
@@ -97,6 +127,7 @@ if PY2:
     bytechr = chr
     chr = unichr
 else:
+    import builtins
     from builtins import ascii, filter, hex, map, oct, zip
     bytes = bytes
     str = str
@@ -142,6 +173,32 @@ _kldgmsg = ('The function/class "{name}" exists in neither versions 2 or 3 of '
 # behavior of chr
 bytechr = _func_warn(bytechr, name='bytechar', msg=_kldgmsg)
 
+# module renames
+if PY2:
+
+    # windows only, so skip possible import errors
+    try:
+        import _winreg as winreg
+    except ImportError:
+        pass
+
+    import ConfigParser as configparser
+    import copy_reg as copyreg
+    import Queue as queue
+    import SocketServer as socketserver
+    import markupbase as _markupbase
+    import repr as reprlib
+    import Tkinter as tkinter
+else:
+    import winreg
+    import configparser
+    import copyreg
+    import queue
+    import socketserver
+    import _markupbase
+    import reprlib
+    import tkinter
+
 _name_map = {'builtins': '__builtin__',
              'winreg': '_winreg',
              'configparser': 'ConfigParser',
@@ -169,6 +226,10 @@ def _load_tk():
 
 
 def _load_dbm():
+    dbm = types.ModuleType('dbm', '')
+    anydbm = __import__('anydbm', level=0)
+    setattr(dbm, '__doc__', getattr(anydbm, '__doc__', ''))
+
     mod = __import__('anydbm', level=0)
     sys.modules.pop('anydbm')
 

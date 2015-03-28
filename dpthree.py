@@ -35,6 +35,7 @@ __all__ = ('ascii', 'filter', 'hex', 'map', 'oct', 'zip',
            'bytes', 'str', 'basestring', 'range', 'input', 'chr',
            'unicode', 'xrange', 'reduce', 'raw_input', 'unichr')
 
+__all__ += ('builtins',)
 # __all__ = ('builtins', 'tkinter', 'dbm', 'winreg')
 
 import sys
@@ -106,7 +107,7 @@ if PY2:
         setattr(builtins, _set, getattr(builtins, _get))
 
     # attributes to flat out delete
-    for _attr in ('basestring', 'reduce', 'execfile', 'unicode', 'raw_input', 'unichr'):
+    for _attr in ('apply', 'basestring', 'reduce', 'execfile', 'unicode', 'raw_input', 'unichr'):
         delattr(builtins, _attr)
 
     import future_builtins
@@ -117,6 +118,7 @@ if PY2:
     import io
     builtins.open = io.open
     del io
+
 
     from future_builtins import ascii, filter, hex, map, oct, zip
     bytes = str
@@ -147,6 +149,8 @@ else:
     chr = chr
 
 
+
+sys.modules['.'.join([__name__, builtins.__name__])] = builtins
 # code for both versions of Python
 # These work for both since we have already redifined the input callables to
 # match Python 3.
@@ -190,7 +194,10 @@ if PY2:
     import repr as reprlib
     import Tkinter as tkinter
 else:
-    import winreg
+    try:
+        import winreg
+    except ImportError:
+        pass
     import configparser
     import copyreg
     import queue

@@ -6,6 +6,8 @@ import warnings
 
 import dpthree
 from dpthree import *
+from dpthree import builtins
+from dpthree.builtins import int
 from dpthree import bytechr
 
 try:
@@ -25,46 +27,41 @@ class Test_dpthree(unittest.TestCase):
             self.catcher.__exit__(None, None, None)
             raise
 
+    def test_removed_builtins(self):
+        with self.assertRaises(ImportError):
+            from dpthree.builtins import apply
+
+        with self.assertRaises(ImportError):
+            from dpthree.builtins import apply
+
+        with self.assertRaises(ImportError):
+            from dpthree.builtins import apply
+
+        with self.assertRaises(ImportError):
+            from dpthree.builtins import apply
+
+        with self.assertRaises(ImportError):
+            from dpthree.builtins import apply
     def test_warnings(self):
         warnings.simplefilter('error', DeprecationWarning)
 
         with self.assertRaises(Warning):
-            try:
-                unicode('unicode')
-            except Exception as e:
-                # print(e, file=sys.stderr)
-                raise
+            unicode('unicode')
 
         with self.assertRaises(Warning):
-            try:
-                xrange(10)
-            except Exception as e:
-                # print(e, file=sys.stderr)
-                raise
+            xrange(10)
 
         with self.assertRaises(Warning):
-            try:
-                reduce([1, 2, 3, 4, 5])
-            except Exception as e:
-                # print(e, file=sys.stderr)
-                raise
+            reduce([1, 2, 3, 4, 5])
 
         with self.assertRaises(Warning):
             raw_input('-> ')
 
         with self.assertRaises(Warning):
-            try:
-                unichr(6000)
-            except Exception as e:
-                # print(e, file=sys.stderr)
-                raise
+            unichr(6000)
 
         with self.assertRaises(Warning):
-            try:
-                bytechr(128)
-            except Exception as e:
-                # print(e, file=sys.stderr)
-                raise
+            bytechr(128)
 
     def test_bytechr(self):
         with self.assertRaises(TypeError):

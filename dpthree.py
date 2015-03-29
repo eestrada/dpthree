@@ -98,7 +98,7 @@ if PY2:
     import __builtin__ as past_builtins
     import future_builtins
 
-    _to_remove = set(['apply', 'basestring', 'buffer', 'coerce', 'reduce',
+    _to_remove = set(['apply', 'basestring', 'buffer', 'coerce', 'reduce', 'file',
                       'execfile', 'intern', 'unicode', 'raw_input', 'unichr'])
     _to_add = set(n for n in dir(past_builtins) if not n.startswith('_'))
     _to_add.update(('__import__', '__doc__'))
@@ -121,18 +121,8 @@ if PY2:
     # This is only needed on PY2
     sys.modules['builtins'] = builtins
 
-    bytechr = chr
 else:
     import builtins
-
-    def bytechr(i):
-        """Return bytestring of one character with ordinal i; 0 <= i < 256."""
-        if not 0 <= i < 256:
-            if not isinstance(i, int):
-                raise TypeError('an integer is required')
-            else:
-                raise ValueError('bytechr() arg not in range(256)')
-        return chr(i).encode('latin1')
 
 # make sure importing works correctly for our builtins submodule in PY2 and PY3
 sys.modules['.'.join([__name__, builtins.__name__])] = builtins
@@ -149,12 +139,13 @@ removed = types.ModuleType('removed', ('Builtins removed in Python 3.0 and '
 
 
 def _bs_raise(*args, **kwargs):
+    """Pseudo constructor for basestring."""
     raise TypeError('The basestring type cannot be instantiated')
 
-removed.unicode = _class_warn(builtins.str, name='unicode')
 removed.basestring = _class_warn(_bs_raise,
                                  subs=(basestring,) if PY2 else (str, bytes),
                                  name='basestring')
+removed.unicode = _class_warn(builtins.str, name='unicode')
 removed.xrange = _class_warn(builtins.range, name='xrange')
 removed.reduce = _func_warn(functools.reduce, 'reduce')
 removed.raw_input = _func_warn(builtins.input, 'raw_input')
@@ -177,6 +168,19 @@ _kldgmsg = ('The function/class "{name}" exists in neither versions 2 nor 3 '
             'of Python. It is merely a kludge to help cover up differences '
             'between the two versions.')
 
+
+def bytechr(i):
+    """Return bytestring of one character with ordinal i; 0 <= i < 256."""
+    if not 0 <= i < 256:
+        if not isinstance(i, int):
+            raise TypeError('an integer is required')
+        else:
+            raise ValueError('bytechr() arg not in range(256)')
+    return chr(i).encode('latin1')
+
+if PY2:
+    bytechr = chr
+
 # since chr now only works with unicode, this callable gives the Python 2
 # behavior of chr
 kludges.bytechr = _func_warn(bytechr, name='bytechr', msg=_kldgmsg)
@@ -184,34 +188,34 @@ kludges.bytechr = _func_warn(bytechr, name='bytechr', msg=_kldgmsg)
 sys.modules['.'.join([__name__, kludges.__name__])] = kludges
 del _kludge_doc, _kldgmsg, _bs_raise
 
-# module renames
+# moved or renamed
+modules = types.ModuleType('modules', 'Moved or renamed modules. Some of '
+                           'these have extra or changed members.')
+
+
+_name_map = {'builtins': '__builtin__',
+             'winreg': '_winreg',
+             'configparser': 'ConfigParser',
+             'copyreg': 'copy_reg',
+             'queue': 'Queue',
+             'socketserver': 'SocketServer',
+             '_markupbase': 'markupbase',
+             'reprlib': 'repr',
+             'tkinter': 'Tkinter'}
+
 if PY2:
-
-    # windows only, so skip possible import errors
-    try:
-        import _winreg as winreg
-    except ImportError:
-        pass
-
-    import ConfigParser as configparser
-    import copy_reg as copyreg
-    import Queue as queue
-    import SocketServer as socketserver
-    import markupbase as _markupbase
-    import repr as reprlib
-    import Tkinter as tkinter
+    _names = _name_map.items()
 else:
+    _names = list(_name_map.keys())
+    _names = zip(_names, _names)
+
+for _new, _old in _names:
     try:
-        import winreg
+        setattr(modules, _new, __import__(_old, level=0))
     except ImportError:
         pass
-    import configparser
-    import copyreg
-    import queue
-    import socketserver
-    import _markupbase
-    import reprlib
-    import tkinter
+
+# module renames
 
 _name_map = {'builtins': '__builtin__',
              'winreg': '_winreg',

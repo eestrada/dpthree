@@ -9,6 +9,7 @@ import dpthree
 from dpthree import kludges
 from dpthree import removed
 from dpthree import builtins
+from dpthree import modules
 
 
 try:
@@ -33,7 +34,7 @@ class Test_dpthree(unittest.TestCase):
             from dpthree.builtins import apply
 
         with self.assertRaises(ImportError):
-            from dpthree.builtins import apply
+            from dpthree.builtins import file
 
         with self.assertRaises(ImportError):
             from dpthree.builtins import apply
@@ -43,6 +44,10 @@ class Test_dpthree(unittest.TestCase):
 
         with self.assertRaises(ImportError):
             from dpthree.builtins import apply
+
+    def test_modules(self):
+        if hasattr(modules, 'tkinter'):
+            pass
 
     def test_warnings(self):
         warnings.simplefilter('error', DeprecationWarning)

@@ -46,8 +46,13 @@ class Test_dpthree(unittest.TestCase):
             from dpthree.builtins import apply
 
     def test_modules(self):
+        from importlib import import_module
         if hasattr(modules, 'tkinter'):
-            pass
+            for mod in ('dpthree.modules.tkinter.', 'tkinter.'):
+                for sub in ('scrolledtext', 'colorchooser', 'commondialog',
+                            'filedialog', 'font', 'messagebox', 'simpledialog',
+                            'dnd'):
+                    import_module(mod + sub)
 
     def test_warnings(self):
         warnings.simplefilter('error', DeprecationWarning)

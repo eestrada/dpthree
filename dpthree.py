@@ -192,6 +192,7 @@ del _kludge_doc, _kldgmsg, _bs_raise
 modules = types.ModuleType('modules', 'Moved or renamed modules. Some of '
                            'these have extra or changed members.')
 
+sys.modules['.'.join([__name__, modules.__name__])] = modules
 
 _name_map = {'builtins': '__builtin__',
              'winreg': '_winreg',
@@ -211,36 +212,46 @@ else:
 
 for _new, _old in _names:
     try:
-        setattr(modules, _new, __import__(_old, level=0))
+        _mod = __import__(_old, level=0)
+        setattr(modules, _new, _mod)
+        sys.modules['.'.join([__name__, 'modules', _new])] = _mod
     except ImportError:
         pass
 
 # module renames
 
-_name_map = {'builtins': '__builtin__',
-             'winreg': '_winreg',
-             'configparser': 'ConfigParser',
-             'copyreg': 'copy_reg',
-             'queue': 'Queue',
-             'socketserver': 'SocketServer',
-             '_markupbase': 'markupbase',
-             'reprlib': 'repr',
-             'test.support': 'test.test_support',
-             'tkinter': 'Tkinter'}
-
-
-def _load_tk():
-    old = ('ScrolledText', 'tkColorChooser', 'tkCommonDialog', 'tkFileDialog',
+_tk_old = ('ScrolledText', 'tkColorChooser', 'tkCommonDialog', 'tkFileDialog',
            'tkFont', 'tkMessageBox', 'tkSimpleDialog', 'Tkdnd', 'ttk', 'Tix')
-    new = ('scrolledtext', 'colorchooser', 'commondialog', 'filedialog',
+_tk_new = ('scrolledtext', 'colorchooser', 'commondialog', 'filedialog',
            'font', 'messagebox', 'simpledialog', 'dnd', 'ttk', 'tix')
 
+
+def _dp_tk2():
     mod = __import__('Tkinter', level=0)
-    sys.modules.pop('Tkinter')
-    for old, new in zip(old, new):
-        setattr(mod, new, __import__(old, level=0))
+    sys.modules['tkinter'] = mod
+    for old, new in zip(_tk_old, _tk_new):
+        smod = __import__(old, level=0)
+        setattr(mod, new, smod)
+        sys.modules['tkinter.' + new] = smod
 
     return mod
+
+def _dp_tk3():
+    # although these exist in PY3, make sure they are loaded, otherwise
+    # submodule imports for dpthree.modules.tkinter will not work
+    for _name in _tk_new:
+        __import__('tkinter.' + _name, level=0)
+
+if hasattr(modules, 'tkinter'):
+    if PY2:
+        _dp_tk2()
+    else:
+        _dp_tk3()
+
+    for _name in _tk_new:
+        sys.modules['.'.join([__name__, 'modules.tkinter', _name])] = getattr(modules.tkinter, _name)
+
+del _tk_old, _tk_new
 
 
 def _load_dbm():
@@ -276,7 +287,7 @@ def _loadnewname(name):
             if name == 'dbm':
                 mod = _load_dbm()
             elif name == 'tkinter':
-                mod = _load_tk()
+                mod = _dp_tk_subs2()
             else:
                 mod = __import__(_name_map[name], level=0)
             sys.modules[name] = mod

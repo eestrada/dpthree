@@ -5,14 +5,14 @@ current module get overwritten via Duck Punching. This is also sometimes called
 Monkey Patching.
 
 The module is meant to be imported with a star import, like this:
-    from dpthree import *
+    from dpthree.builtins import *
 
 When imported this way, it will override builtin callables that have different
 behaviour in Python 3. It also imports some callables that have the same
 functionality, but different names in Python 3. For instance, the unicode
 builtin in Python 2 is the same as the str builtin in Python 3. It is defined
 here to help port old code. However, any names that have been removed in
-Python 3 use a DeprecationWarning (which will either be ignored, printed, or
+Python 3 raise a DeprecationWarning (which will either be ignored, printed, or
 raised based on the warning level used).
 
 Removals to be made aware of:
@@ -31,13 +31,10 @@ parent. Use isinstance(obj, (str, bytes)) instead.
 """
 from __future__ import print_function, absolute_import, division
 
-__all__ = ('ascii', 'filter', 'hex', 'map', 'oct', 'zip',
-           'bytes', 'str', 'basestring', 'range', 'input', 'chr',
-           'unicode', 'xrange', 'reduce', 'raw_input', 'unichr')
-
-__all__ += ('builtins',)
+__all__ = ('builtins', 'removed', 'kludges')
 # __all__ = ('builtins', 'tkinter', 'dbm', 'winreg')
 
+import io
 import sys
 import abc
 import types
@@ -60,6 +57,10 @@ def _func_warn(f, name=None, msg=None, cat=DeprecationWarning):
     def wrapper(*args, **kwargs):
         warnings.warn(wrnmsg, cat, stacklevel=2)
         return f(*args, **kwargs)
+    wrapper.__name__ = name
+
+    # NOTE: this may cause issues. Consider removal.
+    wrapper.__doc__ = f.__doc__.replace(f.__name__, name)
 
     return wrapper
 
@@ -80,62 +81,49 @@ def _class_warn(return_type, subs=None, name=None, msg=None,
         warnings.warn(wrnmsg, cat, stacklevel=2)
         return return_type(*args, **kwargs)
 
+    @classmethod
     def __subclasshook__(cls, C):
         """Check inheritance against real underlying type(s)."""
         warnings.warn(wrnmsg, cat, stacklevel=4)
         return issubclass(C, subs)
 
-    __subclasshook__ = classmethod(__subclasshook__)
-
     attrs = dict(__new__=__new__, __subclasshook__=__subclasshook__)
 
     return abc.ABCMeta(name, (object,), attrs)
 
+# build PY3 style builtins module from scratch
 if PY2:
-    builtins = types.ModuleType('builtins', '')
-
+    # TODO: make bytes callable create an object more like PY3 bytes object
+    builtins = types.ModuleType('builtins')
     import __builtin__ as past_builtins
-    for _attr in dir(past_builtins):
-        if not _attr.startswith('_'):
-            setattr(builtins, _attr, getattr(past_builtins, _attr))
-    builtins.__import__ = past_builtins.__import__
-    builtins.__doc__ = past_builtins.__doc__
-    del past_builtins
+    import future_builtins
+
+    _to_remove = set(['apply', 'basestring', 'buffer', 'coerce', 'reduce',
+                      'execfile', 'intern', 'unicode', 'raw_input', 'unichr'])
+    _to_add = set(n for n in dir(past_builtins) if not n.startswith('_'))
+    _to_add.update(('__import__', '__doc__'))
+    _to_add -= _to_remove
+    for _attr in _to_add:
+        setattr(builtins, _attr, getattr(past_builtins, _attr))
 
     # duck punch old names that mean something different in Py3
     for _set, _get in [('chr', 'unichr'), ('range', 'xrange'), ('bytes', 'str'), ('str', 'unicode'), ('input', 'raw_input')]:
-        setattr(builtins, _set, getattr(builtins, _get))
+        setattr(builtins, _set, getattr(past_builtins, _get))
 
-    # attributes to flat out delete
-    for _attr in ('apply', 'basestring', 'reduce', 'execfile', 'unicode', 'raw_input', 'unichr'):
-        delattr(builtins, _attr)
-
-    import future_builtins
+    # old names with new semantics
     for _attr in ('ascii', 'filter', 'hex', 'map', 'oct', 'zip'):
         setattr(builtins, _attr, getattr(future_builtins, _attr))
-    del future_builtins
 
-    import io
     builtins.open = io.open
-    del io
 
+    del past_builtins, _to_add, _to_remove, future_builtins
 
-    from future_builtins import ascii, filter, hex, map, oct, zip
-    bytes = str
-    str = unicode
-    _bs_subs = (basestring,)
-    range = xrange
-    input = raw_input
+    # This is only needed on PY2
+    sys.modules['builtins'] = builtins
+
     bytechr = chr
-    chr = unichr
 else:
     import builtins
-    from builtins import ascii, filter, hex, map, oct, zip
-    bytes = bytes
-    str = str
-    _bs_subs = (str, bytes)
-    range = range
-    input = input
 
     def bytechr(i):
         """Return bytestring of one character with ordinal i; 0 <= i < 256."""
@@ -146,36 +134,55 @@ else:
                 raise ValueError('bytechr() arg not in range(256)')
         return chr(i).encode('latin1')
 
-    chr = chr
-
-
-
+# make sure importing works correctly for our builtins submodule in PY2 and PY3
 sys.modules['.'.join([__name__, builtins.__name__])] = builtins
-# code for both versions of Python
-# These work for both since we have already redifined the input callables to
-# match Python 3.
+
+# removed builtin names
 # These types and callables exist in Python 2 but not in Python 3 (or, they
 # exist, but not by these names). They shouldn't be used, but can be helpful in
 # getting Python 2 code to run in Python 3 with fewer modifications. Use of
 # any of these raises a DeprecationWarning.
+removed = types.ModuleType('removed', ('Builtins removed in Python 3.0 and '
+                                       'above.\n\nNoteworthy: all callables '
+                                       'in this module print/raise a '
+                                       'DeprecationWarning when used.'))
+
+
 def _bs_raise(*args, **kwargs):
     raise TypeError('The basestring type cannot be instantiated')
 
-unicode = _class_warn(str, name='unicode')
-basestring = _class_warn(_bs_raise, subs=_bs_subs, name='basestring')
-xrange = _class_warn(range, name='xrange')
-reduce = _func_warn(functools.reduce, 'reduce')
-raw_input = _func_warn(input, 'raw_input')
-unichr = _func_warn(chr, 'unichr')
+removed.unicode = _class_warn(builtins.str, name='unicode')
+removed.basestring = _class_warn(_bs_raise,
+                                 subs=(basestring,) if PY2 else (str, bytes),
+                                 name='basestring')
+removed.xrange = _class_warn(builtins.range, name='xrange')
+removed.reduce = _func_warn(functools.reduce, 'reduce')
+removed.raw_input = _func_warn(builtins.input, 'raw_input')
+removed.unichr = _func_warn(builtins.chr, 'unichr')
+
+sys.modules['.'.join([__name__, removed.__name__])] = removed
+
+# kludges to help smooth over differences
+_kludge_doc = ('Kludges for Python 2 builtins that have no equivalent in '
+               'Python 3. Use of these is discouraged, as this makes your '
+               'software dependent on dpthree for, basically, forever. You '
+               'should instead create your own solution or copy any needed '
+               'solutions from the dpthree source.\n\nNoteworthy: all '
+               'callables in this module print/raise a DeprecationWarning '
+               'when used.')
+kludges = types.ModuleType('kludges', _kludge_doc)
 
 # kludges for things that have no new equivalent in Python 3.
-_kldgmsg = ('The function/class "{name}" exists in neither versions 2 or 3 of '
-            'Python. It is merely a kludge to help cover up differences '
+_kldgmsg = ('The function/class "{name}" exists in neither versions 2 nor 3 '
+            'of Python. It is merely a kludge to help cover up differences '
             'between the two versions.')
 
 # since chr now only works with unicode, this callable gives the Python 2
 # behavior of chr
-bytechr = _func_warn(bytechr, name='bytechar', msg=_kldgmsg)
+kludges.bytechr = _func_warn(bytechr, name='bytechr', msg=_kldgmsg)
+
+sys.modules['.'.join([__name__, kludges.__name__])] = kludges
+del _kludge_doc, _kldgmsg, _bs_raise
 
 # module renames
 if PY2:

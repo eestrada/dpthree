@@ -1,18 +1,19 @@
 """Test module for dpthree."""
-from __future__ import print_function, absolute_import, unicode_literals
+from __future__ import print_function, absolute_import
 
 import sys
 import warnings
 
 import dpthree
-from dpthree import *
+
+from dpthree import kludges
+from dpthree import removed
 from dpthree import builtins
-from dpthree.builtins import int
-from dpthree import bytechr
+
 
 try:
     import unittest2 as unittest
-except:
+except ImportError:
     import unittest
 
 
@@ -42,90 +43,87 @@ class Test_dpthree(unittest.TestCase):
 
         with self.assertRaises(ImportError):
             from dpthree.builtins import apply
+
     def test_warnings(self):
         warnings.simplefilter('error', DeprecationWarning)
 
         with self.assertRaises(Warning):
-            unicode('unicode')
+            removed.unicode(u'unicode')
 
         with self.assertRaises(Warning):
-            xrange(10)
+            removed.xrange(10)
 
         with self.assertRaises(Warning):
-            reduce([1, 2, 3, 4, 5])
+            removed.reduce([1, 2, 3, 4, 5])
 
         with self.assertRaises(Warning):
-            raw_input('-> ')
+            removed.raw_input('-> ')
 
         with self.assertRaises(Warning):
-            unichr(6000)
+            removed.unichr(6000)
 
         with self.assertRaises(Warning):
-            bytechr(128)
+            kludges.bytechr(128)
 
     def test_bytechr(self):
         with self.assertRaises(TypeError):
-            bytechr('a string')  # should only accept integers
+            kludges.bytechr(u'a string')  # should only accept integers
 
         with self.assertRaises(ValueError):
-            bytechr(256)  # should be too large a value
+            kludges.bytechr(256)  # should be too large a value
 
-        self.assertIsInstance(bytechr(0), bytes)  # only return byte strings
+        # only return byte strings
+        self.assertIsInstance(kludges.bytechr(0), bytes)
 
         for i in range(256):
-            self.assertEqual(len(bytechr(i)), 1)
+            self.assertEqual(len(kludges.bytechr(i)), 1)
 
     def test_basestring(self):
         with self.assertRaises(TypeError):
-            basestring()
+            removed.basestring()
 
         with self.assertRaises(TypeError):
-            basestring('arg')
+            removed.basestring('arg')
 
         with self.assertRaises(TypeError):
-            basestring(key='value')
+            removed.basestring(key='value')
 
     def test_inheritance(self):
-        self.assertIsInstance(unicode('unicode'), str)
-        self.assertIsInstance('unicode string', unicode)
+        self.assertIsInstance(removed.unicode(u'unicode'), builtins.str)
+        self.assertIsInstance(u'unicode string', removed.unicode)
 
-        self.assertIsInstance(bytes(), bytes)
-        self.assertIsInstance(b'byte string', bytes)
+        self.assertIsInstance(builtins.bytes(), builtins.bytes)
+        self.assertIsInstance(b'byte string', builtins.bytes)
 
-        self.assertIsInstance(str(), basestring)
-        self.assertIsInstance(bytes(), basestring)
-        self.assertIsInstance('unicode string', basestring)
-        self.assertIsInstance(b'byte string', basestring)
+        self.assertIsInstance(builtins.str(), removed.basestring)
+        self.assertIsInstance(builtins.bytes(), removed.basestring)
+        self.assertIsInstance(u'unicode string', removed.basestring)
+        self.assertIsInstance(b'byte string', removed.basestring)
 
-        self.assertIsInstance(xrange(1), range)
-        self.assertIsInstance(xrange(1), xrange)
+        self.assertIsInstance(removed.xrange(1), builtins.range)
+        self.assertIsInstance(removed.xrange(1), removed.xrange)
 
     def test_names(self):
         if dpthree.PY2:
-            self.assertEqual(unicode.__name__, 'unicode')
-            self.assertEqual(str.__name__, 'unicode')
-            self.assertEqual(bytes.__name__, 'str')
+            self.assertEqual(builtins.str.__name__, 'unicode')
+            self.assertEqual(builtins.bytes.__name__, 'str')
 
-            self.assertEqual(range.__name__, 'xrange')
-            self.assertEqual(raw_input.__name__, 'raw_input')
+            self.assertEqual(builtins.range.__name__, 'xrange')
 
-            self.assertEqual(bytechr.__name__, 'chr')
-            self.assertEqual(chr.__name__, 'unichr')
-            self.assertEqual(unichr.__name__, 'unichr')
+            self.assertEqual(builtins.chr.__name__, 'unichr')
 
         if dpthree.PY3:
-            self.assertEqual(unicode.__name__, 'unicode')
-            self.assertEqual(str.__name__, 'str')
-            self.assertEqual(bytes.__name__, 'bytes')
+            self.assertEqual(builtins.str.__name__, 'str')
+            self.assertEqual(builtins.bytes.__name__, 'bytes')
 
-            self.assertEqual(raw_input.__name__, 'input')
-
-            self.assertEqual(bytechr.__name__, 'bytechr')
-            self.assertEqual(chr.__name__, 'chr')
-            self.assertEqual(unichr.__name__, 'chr')
+            self.assertEqual(builtins.chr.__name__, 'chr')
 
         # asserts for all versions
-        self.assertEqual(xrange.__name__, 'xrange')
+        self.assertEqual(kludges.bytechr.__name__, 'bytechr')
+        self.assertEqual(removed.raw_input.__name__, 'raw_input')
+        self.assertEqual(removed.unicode.__name__, 'unicode')
+        self.assertEqual(removed.unichr.__name__, 'unichr')
+        self.assertEqual(removed.xrange.__name__, 'xrange')
 
     def tearDown(self):
         self.catcher.__exit__(None, None, None)

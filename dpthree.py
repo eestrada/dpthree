@@ -94,6 +94,8 @@ def _class_warn(return_type, subs=None, name=None, msg=None,
 # build PY3 style builtins module from scratch
 if PY2:
     # TODO: make bytes class that is more like PY3 bytes class
+    # TODO: add '__all__' attribute to homebrew builtins so that star 
+    # import only duck punches builtins with changed semantics
     builtins = types.ModuleType('builtins')
     import __builtin__ as past_builtins
     import future_builtins

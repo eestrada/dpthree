@@ -216,12 +216,14 @@ else:
 for _new, _old in _names:
     try:
         _mod = __import__(_old, level=0)
+    except ImportError:
+        continue
+    else:
         setattr(modules, _new, _mod)
+        # duck punch relative to internal sub-module
         sys.modules['.'.join([__name__, 'modules', _new])] = _mod
         # also duck punch module module name as a top level name
         sys.modules[_new] = _mod
-    except ImportError:
-        pass
 
 # module renames
 
@@ -235,9 +237,13 @@ def _dp_tk2():
     mod = __import__('Tkinter', level=0)
     sys.modules['tkinter'] = mod
     for old, new in zip(_tk_old, _tk_new):
-        smod = __import__(old, level=0)
-        setattr(mod, new, smod)
-        sys.modules['tkinter.' + new] = smod
+        try:
+            smod = __import__(old, level=0)
+        except ImportError as e:
+            continue
+        else:
+            setattr(mod, new, smod)
+            sys.modules['tkinter.' + new] = smod
 
     return mod
 
@@ -245,7 +251,10 @@ def _dp_tk3():
     # although these exist in PY3, make sure they are loaded, otherwise
     # submodule imports for dpthree.modules.tkinter will not work properly
     for _name in _tk_new:
-        __import__('tkinter.' + _name, level=0)
+        try:
+            __import__('tkinter.' + _name, level=0)
+        except ImportError as e:
+            pass
 
 if hasattr(modules, 'tkinter'):
     if PY2:

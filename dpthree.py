@@ -263,7 +263,8 @@ if hasattr(modules, 'tkinter'):
         _dp_tk3()
 
     for _name in _tk_new:
-        sys.modules['.'.join([__name__, 'modules.tkinter', _name])] = getattr(modules.tkinter, _name)
+        if hasattr(modules.tkinter, _name):
+            sys.modules['.'.join([__name__, 'modules.tkinter', _name])] = getattr(modules.tkinter, _name)
 
 del _tk_old, _tk_new
 

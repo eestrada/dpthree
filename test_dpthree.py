@@ -29,21 +29,11 @@ class Test_dpthree(unittest.TestCase):
             self.catcher.__exit__(None, None, None)
             raise
 
-    def test_removed_builtins(self):
-        with self.assertRaises(ImportError):
-            from dpthree.builtins import apply
-
-        with self.assertRaises(ImportError):
-            from dpthree.builtins import file
-
-        with self.assertRaises(ImportError):
-            from dpthree.builtins import apply
-
-        with self.assertRaises(ImportError):
-            from dpthree.builtins import apply
-
-        with self.assertRaises(ImportError):
-            from dpthree.builtins import apply
+    def test_removed(self):
+        for name in ('apply', 'basestring', 'buffer', 'coerce', 'reduce', 'file',
+                      'execfile', 'intern', 'unicode', 'raw_input', 'unichr'):
+            with self.assertRaises(AttributeError):
+                getattr(builtins, name)
 
     def test_modules(self):
         from importlib import import_module

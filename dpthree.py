@@ -93,7 +93,7 @@ def _class_warn(return_type, subs=None, name=None, msg=None,
 
 # build PY3 style builtins module from scratch
 if PY2:
-    # TODO: make bytes callable create an object more like PY3 bytes object
+    # TODO: make bytes class that is more like PY3 bytes class
     builtins = types.ModuleType('builtins')
     import __builtin__ as past_builtins
     import future_builtins
@@ -107,7 +107,9 @@ if PY2:
         setattr(builtins, _attr, getattr(past_builtins, _attr))
 
     # duck punch old names that mean something different in Py3
-    for _set, _get in [('chr', 'unichr'), ('range', 'xrange'), ('bytes', 'str'), ('str', 'unicode'), ('input', 'raw_input')]:
+    for _set, _get in [('chr', 'unichr'), ('range', 'xrange'), 
+                       ('bytes', 'str'), ('str', 'unicode'), 
+                       ('input', 'raw_input')]:
         setattr(builtins, _set, getattr(past_builtins, _get))
 
     # old names with new semantics
@@ -136,7 +138,7 @@ removed = types.ModuleType('removed', ('Builtins removed in Python 3.0 and '
                                        'above.\n\nNoteworthy: all callables '
                                        'in this module print/raise a '
                                        'DeprecationWarning when used.'))
-
+sys.modules['.'.join([__name__, removed.__name__])] = removed
 
 def _bs_raise(*args, **kwargs):
     """Pseudo constructor for basestring."""
@@ -151,9 +153,9 @@ removed.reduce = _func_warn(functools.reduce, 'reduce')
 removed.raw_input = _func_warn(builtins.input, 'raw_input')
 removed.unichr = _func_warn(builtins.chr, 'unichr')
 
-sys.modules['.'.join([__name__, removed.__name__])] = removed
+del _bs_raise
 
-# kludges to help smooth over differences
+# kludges for things that have no new equivalent in Python 3.
 _kludge_doc = ('Kludges for Python 2 builtins that have no equivalent in '
                'Python 3. Use of these is discouraged, as this makes your '
                'software dependent on dpthree for, basically, forever. You '
@@ -162,11 +164,7 @@ _kludge_doc = ('Kludges for Python 2 builtins that have no equivalent in '
                'callables in this module print/raise a DeprecationWarning '
                'when used.')
 kludges = types.ModuleType('kludges', _kludge_doc)
-
-# kludges for things that have no new equivalent in Python 3.
-_kldgmsg = ('The function/class "{name}" exists in neither versions 2 nor 3 '
-            'of Python. It is merely a kludge to help cover up differences '
-            'between the two versions.')
+sys.modules['.'.join([__name__, kludges.__name__])] = kludges
 
 
 def bytechr(i):
@@ -181,21 +179,24 @@ def bytechr(i):
 if PY2:
     bytechr = chr
 
-# since chr now only works with unicode, this callable gives the Python 2
+_kldgmsg = ('The function/class "{name}" exists in neither versions 2 nor 3 '
+            'of Python. It is merely a kludge to help cover up differences '
+            'between the two versions.')
+
+# since PY3 chr only works with unicode, this callable gives the Python 2
 # behavior of chr
 kludges.bytechr = _func_warn(bytechr, name='bytechr', msg=_kldgmsg)
 
-sys.modules['.'.join([__name__, kludges.__name__])] = kludges
-del _kludge_doc, _kldgmsg, _bs_raise
+# TODO: for PY3 make bytestr class that is like PY2 str class
+
+del _kludge_doc, _kldgmsg
 
 # moved or renamed
 modules = types.ModuleType('modules', 'Moved or renamed modules. Some of '
                            'these have extra or changed members.')
-
 sys.modules['.'.join([__name__, modules.__name__])] = modules
 
-_name_map = {'builtins': '__builtin__',
-             'winreg': '_winreg',
+_name_map = {'winreg': '_winreg',
              'configparser': 'ConfigParser',
              'copyreg': 'copy_reg',
              'queue': 'Queue',
@@ -215,6 +216,8 @@ for _new, _old in _names:
         _mod = __import__(_old, level=0)
         setattr(modules, _new, _mod)
         sys.modules['.'.join([__name__, 'modules', _new])] = _mod
+        # also duck punch module module name as a top level name
+        sys.modules[_new] = _mod
     except ImportError:
         pass
 
@@ -238,7 +241,7 @@ def _dp_tk2():
 
 def _dp_tk3():
     # although these exist in PY3, make sure they are loaded, otherwise
-    # submodule imports for dpthree.modules.tkinter will not work
+    # submodule imports for dpthree.modules.tkinter will not work properly
     for _name in _tk_new:
         __import__('tkinter.' + _name, level=0)
 

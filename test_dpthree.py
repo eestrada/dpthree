@@ -30,10 +30,11 @@ class Test_dpthree(unittest.TestCase):
             raise
 
     def test_removed(self):
-        for name in ('apply', 'basestring', 'buffer', 'coerce', 'reduce', 'file',
+        for name in ('apply', 'basestring', 'buffer', 'long', 'cmp', 'coerce', 'reduce', 'reload', 'file',
                       'execfile', 'intern', 'unicode', 'raw_input', 'unichr'):
             with self.assertRaises(AttributeError):
                 getattr(builtins, name)
+                print('removed builtin %r still available' % name)
 
     def test_modules(self):
         from importlib import import_module

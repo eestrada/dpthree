@@ -100,7 +100,7 @@ if PY2:
     import __builtin__ as past_builtins
     import future_builtins
 
-    _to_remove = set(['apply', 'basestring', 'buffer', 'coerce', 'reduce', 'file',
+    _to_remove = set(['apply', 'basestring', 'buffer', 'long', 'cmp', 'reload', 'coerce', 'reduce', 'file',
                       'execfile', 'intern', 'unicode', 'raw_input', 'unichr'])
     _to_add = set(n for n in dir(past_builtins) if not n.startswith('_'))
     _to_add.update(('__import__', '__doc__'))

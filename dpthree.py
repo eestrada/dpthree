@@ -119,27 +119,24 @@ if PY2:
     for _attr in ('ascii', 'filter', 'hex', 'map', 'oct', 'zip'):
         setattr(builtins, _attr, getattr(future_builtins, _attr))
 
-    _new_int_class = """
-class int(long):
+    # make builtins int act more like Python3 int (a la Python2 long)
+    exec("""class int(long):
     def __new__(cls, x=0, *args, **kwargs):
         # run super constructor first to cause other exceptions to be
         # raised first.
         retval = super(int, cls).__new__(cls, x, *args, **kwargs)
         if isinstance(x, (str, bytes)) and x.endswith('L'):
             base = args[0] if args else kwargs.get('base', 10)
-            raise ValueError("invalid literal for int() with base %r: '%s'" % (base, x))
+            raise ValueError("invalid literal for int() with base %r: '%s'" %
+                             (base, x))
         return retval
 
-    def __repr__(self):
-        return super(int, self).__repr__().rstrip('L')
-
-"""
-
-    exec(_new_int_class, vars(builtins))
+        def __repr__(self):
+            return super(int, self).__repr__().rstrip('L')""", vars(builtins))
 
     builtins.open = io.open
 
-    del past_builtins, _to_add, _to_remove, future_builtins, _new_int_class
+    del past_builtins, _to_add, _to_remove, future_builtins
 
     # This is only needed on PY2
     sys.modules['builtins'] = builtins

@@ -100,8 +100,9 @@ if PY2:
     import __builtin__ as past_builtins
     import future_builtins
 
-    _to_remove = set(['apply', 'basestring', 'buffer', 'long', 'cmp', 'reload', 'coerce', 'reduce', 'file',
-                      'execfile', 'intern', 'unicode', 'raw_input', 'unichr'])
+    _to_remove = set(['apply', 'basestring', 'buffer', 'cmp', 'coerce',
+                      'execfile', 'file', 'intern', 'long', 'raw_input',
+                      'reduce', 'reload', 'unichr', 'unicode'])
     _to_add = set(n for n in dir(past_builtins) if not n.startswith('_'))
     _to_add.update(('__import__', '__doc__'))
     _to_add -= _to_remove
@@ -118,9 +119,27 @@ if PY2:
     for _attr in ('ascii', 'filter', 'hex', 'map', 'oct', 'zip'):
         setattr(builtins, _attr, getattr(future_builtins, _attr))
 
+    _new_int_class = """
+class int(long):
+    def __new__(cls, x=0, *args, **kwargs):
+        # run super constructor first to cause other exceptions to be
+        # raised first.
+        retval = super(int, cls).__new__(cls, x, *args, **kwargs)
+        if isinstance(x, (str, bytes)) and x.endswith('L'):
+            base = args[0] if args else kwargs.get('base', 10)
+            raise ValueError("invalid literal for int() with base %r: '%s'" % (base, x))
+        return retval
+
+    def __repr__(self):
+        return super(int, self).__repr__().rstrip('L')
+
+"""
+
+    exec(_new_int_class, vars(builtins))
+
     builtins.open = io.open
 
-    del past_builtins, _to_add, _to_remove, future_builtins
+    del past_builtins, _to_add, _to_remove, future_builtins, _new_int_class
 
     # This is only needed on PY2
     sys.modules['builtins'] = builtins

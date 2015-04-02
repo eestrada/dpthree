@@ -100,6 +100,8 @@ if PY2:
     import __builtin__ as past_builtins
     import future_builtins
 
+    builtins._past_builtins = past_builtins
+
     _to_remove = set(['apply', 'basestring', 'buffer', 'cmp', 'coerce',
                       'execfile', 'file', 'intern', 'long', 'raw_input',
                       'reduce', 'reload', 'unichr', 'unicode'])
@@ -119,8 +121,13 @@ if PY2:
     for _attr in ('ascii', 'filter', 'hex', 'map', 'oct', 'zip'):
         setattr(builtins, _attr, getattr(future_builtins, _attr))
 
+    builtins.open = io.open
+
     # make builtins int act more like Python3 int (a la Python2 long)
     exec("""class int(long):
+    import abc
+    __metaclass__ = abc.ABCMeta
+
     def __new__(cls, x=0, *args, **kwargs):
         # run super constructor first to cause other exceptions to be
         # raised first.
@@ -131,10 +138,28 @@ if PY2:
                              (base, x))
         return retval
 
-        def __repr__(self):
-            return super(int, self).__repr__().rstrip('L')""", vars(builtins))
+    def __repr__(self):
+        return super(int, self).__repr__().rstrip('L')
 
-    builtins.open = io.open
+    @classmethod
+    def __subclasshook__(cls, C):
+        return issubclass(C, (_past_builtins.int, _past_builtins.long))""", vars(builtins))
+
+    exec("""class bytes(bytes):
+    import abc
+    __metaclass__ = abc.ABCMeta
+
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            return super(bytes, self).__getitem__(index)
+        return ord(super(bytes, self).__getitem__(index))
+
+    def __repr__(self):
+        return 'b' + super(bytes, self).__repr__()
+
+    @classmethod
+    def __subclasshook__(cls, C):
+        return issubclass(C, _past_builtins.bytes)""", vars(builtins))
 
     del past_builtins, _to_add, _to_remove, future_builtins
 

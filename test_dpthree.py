@@ -89,6 +89,11 @@ class Test_dpthree(unittest.TestCase):
         with self.assertRaises(TypeError):
             removed.basestring(key='value')
 
+    def test_bytes(self):
+        test_bytes = builtins.bytes(b'I am a bytes object.')
+        self.assertIsInstance(test_bytes[0:1], builtins.bytes)
+        self.assertIsInstance(test_bytes[0], builtins.int)
+
     @unittest.skipIf(not dpthree.PY2, "Test is only relevant in Python 2")
     def test_new_int(self):
         # duck punched int type inherits from Python 2 long type
@@ -128,22 +133,24 @@ class Test_dpthree(unittest.TestCase):
     def test_names(self):
         # name asserts for all versions
         self.assertEqual(kludges.bytechr.__name__, 'bytechr')
+
         self.assertEqual(removed.raw_input.__name__, 'raw_input')
         self.assertEqual(removed.unicode.__name__, 'unicode')
         self.assertEqual(removed.unichr.__name__, 'unichr')
         self.assertEqual(removed.xrange.__name__, 'xrange')
 
+        self.assertEqual(builtins.bytes.__name__, 'bytes')
+
     @unittest.skipIf(not dpthree.PY2, "Test is only relevant in Python 2")
     def test_names2(self):
         self.assertEqual(builtins.str.__name__, 'unicode')
-        self.assertEqual(builtins.bytes.__name__, 'str')
         self.assertEqual(builtins.range.__name__, 'xrange')
         self.assertEqual(builtins.chr.__name__, 'unichr')
 
     @unittest.skipIf(not dpthree.PY3, "Test is only relevant in Python 3")
     def test_names3(self):
         self.assertEqual(builtins.str.__name__, 'str')
-        self.assertEqual(builtins.bytes.__name__, 'bytes')
+        self.assertEqual(builtins.range.__name__, 'range')
         self.assertEqual(builtins.chr.__name__, 'chr')
 
     def tearDown(self):

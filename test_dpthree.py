@@ -89,11 +89,6 @@ class Test_dpthree(unittest.TestCase):
         with self.assertRaises(TypeError):
             removed.basestring(key='value')
 
-    def test_bytes(self):
-        test_bytes = builtins.bytes(b'I am a bytes object.')
-        self.assertIsInstance(test_bytes[0:1], builtins.bytes)
-        self.assertIsInstance(test_bytes[0], builtins.int)
-
     @unittest.skipIf(not dpthree.PY2, "Test is only relevant in Python 2")
     def test_new_int(self):
         # duck punched int type inherits from Python 2 long type
@@ -155,6 +150,15 @@ class Test_dpthree(unittest.TestCase):
 
     def tearDown(self):
         self.catcher.__exit__(None, None, None)
+
+class Test_bytes(unittest.TestCase):
+    def setUp(self):
+        self.bytes_obj = builtins.bytes(b'I am a bytes object.')
+
+    def test_indexing(self):
+        self.assertIsInstance(self.bytes_obj[0:1], builtins.bytes)
+        self.assertIsInstance(self.bytes_obj[0], builtins.int)
+
 
 if __name__ == '__main__':
     unittest.main()

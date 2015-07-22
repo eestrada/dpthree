@@ -146,8 +146,12 @@ if PY2:
         return issubclass(C, (_past_builtins.int, _past_builtins.long))""", vars(builtins))
 
     exec("""class bytes(bytes):
-    import abc
-    __metaclass__ = abc.ABCMeta
+    import abc as _abc
+    __metaclass__ = _abc.ABCMeta
+
+    def __new__(cls, source=0, encoding='utf-8', errors='strict'):
+        if isinstance(source, int):
+            return super(bytes, cls).__new__(cls, b'\0' * source)
 
     def __getitem__(self, index):
         if isinstance(index, slice):

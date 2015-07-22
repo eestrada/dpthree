@@ -155,6 +155,9 @@ class Test_bytes(unittest.TestCase):
     def setUp(self):
         self.bytes_obj = builtins.bytes(b'I am a bytes object.')
 
+    def test_construction(self):
+        self.assertEqual(builtins.bytes([73, 79, 85]), builtins.bytes(b'IOU'))
+
     def test_indexing(self):
         self.assertIsInstance(self.bytes_obj[0:1], builtins.bytes)
         self.assertIsInstance(self.bytes_obj[0], builtins.int)

@@ -9,7 +9,7 @@ test:
 	@ echo
 	@ echo
 	python2 ./test_dpthree.py $(VERBOSITY)
-	python3 ./test_builtin.py $(VERBOSITY)
+	python2 ./test_builtin.py $(VERBOSITY)
 
 package:
 	@ echo "Not implemented yet..."

@@ -151,7 +151,7 @@ if PY2:
 
     def __new__(cls, source=0, encoding='utf-8', errors='strict'):
         if isinstance(source, int):
-            return super(bytes, cls).__new__(cls, b'\0' * source)
+            return super(bytes, cls).__new__(cls, b'\\0' * source)
 
     def __getitem__(self, index):
         if isinstance(index, slice):
@@ -273,9 +273,11 @@ for _new, _old in _names:
 # module renames
 
 _tk_old = ('ScrolledText', 'tkColorChooser', 'tkCommonDialog', 'tkFileDialog',
-           'tkFont', 'tkMessageBox', 'tkSimpleDialog', 'Tkdnd', 'ttk', 'Tix')
+           'tkFont', 'tkMessageBox', 'tkSimpleDialog', 'Tkdnd', 'ttk', 'Tix', 
+           'Tkconstants')
 _tk_new = ('scrolledtext', 'colorchooser', 'commondialog', 'filedialog',
-           'font', 'messagebox', 'simpledialog', 'dnd', 'ttk', 'tix')
+           'font', 'messagebox', 'simpledialog', 'dnd', 'ttk', 'tix', 
+           'constants')
 
 
 def _dp_tk2():

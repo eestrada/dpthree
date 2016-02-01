@@ -1,10 +1,15 @@
-Module to deal with the differences between Python 2 and Python 3 builtins.
+dpthree
+=======
+
+This is a module to deal with the differences between Python 2 and Python 3
+builtins.
 
 dpthree stands for "Duck Punch Three." This is because the builtins for the
 current module get overwritten via Duck Punching. This is also sometimes called
 Monkey Patching.
 
 The module is meant to be imported with a star import, like this:
+
     from dpthree.builtins import *
 
 When imported this way, it will override builtin callables that have different

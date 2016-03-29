@@ -164,6 +164,12 @@ if PY2:
     @classmethod
     def __subclasshook__(cls, C):
         return issubclass(C, _past_builtins.bytes)""", vars(builtins))
+    
+    # TODO: duck punch `itertools.filterfalse` as an alias to `itertools.ifilterfalse`
+    # TODO: wrap `itertools.imap`, `itertools.ifilter` and 
+    # `itertools.ifilterfalse` in a deprecation warning (after making the 
+    # `filterfalse` alias, so that it doesn't pick up the warning). Have the
+    # warning point to the `six`, `future` and `dpthree` modules as compatibility options.
 
     del past_builtins, _to_add, _to_remove, future_builtins
 
@@ -234,7 +240,8 @@ _kldgmsg = ('The function/class "{name}" exists in neither versions 2 nor 3 '
 # behavior of chr
 kludges.bytechr = _func_warn(bytechr, name='bytechr', msg=_kldgmsg)
 
-# TODO: for PY3 make bytestr class that is like PY2 str class
+# TODO: for PY3 make `bytestr` class that is like PY2 str class for use in PY3
+# TODO: for PY3 make `nativestr` kludge that is PY2 `str` class in PY2 and PY3 `str` class in PY3
 
 del _kludge_doc, _kldgmsg
 
@@ -272,6 +279,8 @@ for _new, _old in _names:
 
 # module renames
 
+# TODO: change this to a sequence of pairs. Keeping them in sync as two separate
+# sequences is a pain. (Why did I even do this in the first place?!)
 _tk_old = ('ScrolledText', 'tkColorChooser', 'tkCommonDialog', 'tkFileDialog',
            'tkFont', 'tkMessageBox', 'tkSimpleDialog', 'Tkdnd', 'ttk', 'Tix', 
            'Tkconstants')
@@ -295,7 +304,7 @@ def _dp_tk2():
     return mod
 
 def _dp_tk3():
-    # although these exist in PY3, make sure they are loaded, otherwise
+    # NOTE: although these exist in PY3, we make sure they are loaded, otherwise
     # submodule imports for dpthree.modules.tkinter will not work properly
     for _name in _tk_new:
         try:

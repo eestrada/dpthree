@@ -8,7 +8,9 @@ test:
 	@ python$(PYVER) --version
 	@ echo
 	- ls -lh /usr/lib64/python$(PYVER)
+	- ls -lh "/usr/lib64/python*"
 	- ls -lh /usr/lib/python$(PYVER)
+	- ls -lh "/usr/lib/python*"
 	python$(PYVER) ./test_dpthree.py $(VERBOSITY)
 	python$(PYVER) ./test_builtin.py $(VERBOSITY)
 

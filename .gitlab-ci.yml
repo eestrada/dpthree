@@ -7,6 +7,8 @@ stages:
 test2.7:
   image: "python:2.7"
   stage: test
+  variables:
+    PYVER: "2.7"
   before_script:
     - python --version  # Print out version for debugging
   script:
@@ -15,6 +17,8 @@ test2.7:
 test3.4:
   image: "python:3.4"
   stage: test
+  variables:
+    PYVER: "3.4"
   before_script:
     - python --version  # Print out version for debugging
   script:
@@ -23,6 +27,8 @@ test3.4:
 test3.5:
   image: "python:3.5"
   stage: test
+  variables:
+    PYVER: "3.5"
   before_script:
     - python --version  # Print out version for debugging
   script:
@@ -31,6 +37,8 @@ test3.5:
 test3.6:
   image: "python:3.6"
   stage: test
+  variables:
+    PYVER: "3.6"
   before_script:
     - python --version  # Print out version for debugging
   script:

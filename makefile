@@ -1,15 +1,14 @@
 VERBOSITY=-vv
+PYVER?=
 
 .PHONY: test package clean
 
 test:
-	python3 ./test_dpthree.py $(VERBOSITY)
-	python3 ./test_builtin.py $(VERBOSITY)
 	@ echo
+	@ python$(PYVER) --version
 	@ echo
-	@ echo
-	python2 ./test_dpthree.py $(VERBOSITY)
-	python2 ./test_builtin.py $(VERBOSITY)
+	python$(PYVER) ./test_dpthree.py $(VERBOSITY)
+	python$(PYVER) ./test_builtin.py $(VERBOSITY)
 
 package:
 	@ echo "Not implemented yet..."
@@ -18,4 +17,3 @@ package:
 clean:
 	rm -rf __pycache__/
 	find . -name "*.py[cod]" -delete
-

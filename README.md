@@ -1,4 +1,4 @@
-dpthree =======
+# dpthree
 
 This is a module to deal with the differences between Python 2 and
 Python 3 builtins.

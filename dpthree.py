@@ -129,19 +129,19 @@ if PY2:
     builtins.open = io.open
 
     # make builtins int act more like Python3 int (a la Python2 long)
-    exec("""class int(long):
+    exec("""class int(_past_builtins.long):
     import abc
     __metaclass__ = abc.ABCMeta
 
     def __new__(cls, x=0, *args, **kwargs):
         # run super constructor first to cause other exceptions to be
         # raised first.
-        retval = super(int, cls).__new__(cls, x, *args, **kwargs)
+        self = super(int, cls).__new__(cls, x, *args, **kwargs)
         if isinstance(x, (str, bytes)) and x.endswith('L'):
             base = args[0] if args else kwargs.get('base', 10)
             raise ValueError("invalid literal for int() with base %r: '%s'" %
                              (base, x))
-        return retval
+        return self
 
     def __repr__(self):
         return super(int, self).__repr__().rstrip('L')

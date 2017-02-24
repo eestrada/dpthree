@@ -1,6 +1,6 @@
 VERBOSITY=-vv
 PYVER?=
-VENV=source _venv/bin/activate;
+VENV=. _venv/bin/activate;
 
 .PHONY: test test2 test3 package clean
 

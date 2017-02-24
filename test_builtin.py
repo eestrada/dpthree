@@ -9,7 +9,8 @@ import collections
 import io
 import ast
 import types
-import builtins
+from dpthree import builtins
+from dpthree.builtins import *
 import random
 from test.support import TESTFN, unlink,  run_unittest, check_warnings
 from operator import neg

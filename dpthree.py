@@ -145,18 +145,24 @@ if PY2:
     def __subclasshook__(cls, C):
         return issubclass(C, (_past_builtins.int, _past_builtins.long))""", vars(builtins))
 
-    exec("""class bytes(bytes):
+    exec("""class bytes(_past_builtins.bytes):
     import abc as _abc
     __metaclass__ = _abc.ABCMeta
 
     def __new__(cls, source=0, encoding='utf-8', errors='strict'):
         if isinstance(source, int):
             return super(bytes, cls).__new__(cls, b'\\0' * source)
+        elif isinstance(source, _past_builtins.basestring):
+            return super(bytes, cls).__new__(cls, source)
+        else:  # assume an iterator of integers, such that: 0 <= integer < 256
+            _ = b''.join(map(_past_builtins.chr, source))
+            return super(bytes, cls).__new__(cls, _)
 
     def __getitem__(self, index):
         if isinstance(index, slice):
             return super(bytes, self).__getitem__(index)
-        return ord(super(bytes, self).__getitem__(index))
+        else:  # assume integral indexing
+            return ord(super(bytes, self).__getitem__(index))
 
     def __repr__(self):
         return 'b' + super(bytes, self).__repr__()

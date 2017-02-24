@@ -1072,7 +1072,12 @@ class BuiltinTest(unittest.TestCase):
 
     def test_round(self):
         self.assertEqual(round(0.0), 0.0)
+
+        # FIXME: rounding to an int seems to be new in Python 3.5.
+        # How best to deal with this new behavior? Act like Python 3.5 is the right
+        # way? Behave differently for different versions of Python? Something else?
         self.assertEqual(type(round(0.0)), int)
+
         self.assertEqual(round(1.0), 1.0)
         self.assertEqual(round(10.0), 10.0)
         self.assertEqual(round(1000000000.0), 1000000000.0)

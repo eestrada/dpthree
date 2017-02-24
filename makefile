@@ -1,7 +1,7 @@
 VERBOSITY=-vv
 PYVER?=
 
-.PHONY: test package clean
+.PHONY: test test2 test3 package clean
 
 test:
 	@ echo
@@ -9,6 +9,12 @@ test:
 	@ echo
 	python$(PYVER) ./test_dpthree.py $(VERBOSITY)
 	python$(PYVER) ./test_builtin.py $(VERBOSITY)
+
+test2:
+	export PYVER=2 && $(MAKE) test
+
+test3:
+	export PYVER=3 && $(MAKE) test
 
 package:
 	@ echo "Not implemented yet..."

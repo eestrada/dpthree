@@ -94,7 +94,7 @@ def _class_warn(return_type, subs=None, name=None, msg=None,
 # build PY3 style builtins module from scratch
 if PY2:
     # TODO: make bytes class that is more like PY3 bytes class
-    # TODO: add '__all__' attribute to homebrew builtins so that star 
+    # TODO: add '__all__' attribute to homebrew builtins so that star
     # import only duck punches builtins with changed semantics
     builtins = types.ModuleType('builtins')
     import __builtin__ as past_builtins
@@ -112,8 +112,8 @@ if PY2:
         setattr(builtins, _attr, getattr(past_builtins, _attr))
 
     # duck punch old names that mean something different in Py3
-    for _set, _get in [('chr', 'unichr'), ('range', 'xrange'), 
-                       ('bytes', 'str'), ('str', 'unicode'), 
+    for _set, _get in [('chr', 'unichr'), ('range', 'xrange'),
+                       ('bytes', 'str'), ('str', 'unicode'),
                        ('input', 'raw_input')]:
         setattr(builtins, _set, getattr(past_builtins, _get))
 
@@ -170,10 +170,10 @@ if PY2:
     @classmethod
     def __subclasshook__(cls, C):
         return issubclass(C, _past_builtins.bytes)""", vars(builtins))
-    
+
     # TODO: duck punch `itertools.filterfalse` as an alias to `itertools.ifilterfalse`
-    # TODO: wrap `itertools.imap`, `itertools.ifilter` and 
-    # `itertools.ifilterfalse` in a deprecation warning (after making the 
+    # TODO: wrap `itertools.imap`, `itertools.ifilter` and
+    # `itertools.ifilterfalse` in a deprecation warning (after making the
     # `filterfalse` alias, so that it doesn't pick up the warning). Have the
     # warning point to the `six`, `future` and `dpthree` modules as compatibility options.
 
@@ -288,10 +288,10 @@ for _new, _old in _names:
 # TODO: change this to a sequence of pairs. Keeping them in sync as two separate
 # sequences is a pain. (Why did I even do this in the first place?!)
 _tk_old = ('ScrolledText', 'tkColorChooser', 'tkCommonDialog', 'tkFileDialog',
-           'tkFont', 'tkMessageBox', 'tkSimpleDialog', 'Tkdnd', 'ttk', 'Tix', 
+           'tkFont', 'tkMessageBox', 'tkSimpleDialog', 'Tkdnd', 'ttk', 'Tix',
            'Tkconstants')
 _tk_new = ('scrolledtext', 'colorchooser', 'commondialog', 'filedialog',
-           'font', 'messagebox', 'simpledialog', 'dnd', 'ttk', 'tix', 
+           'font', 'messagebox', 'simpledialog', 'dnd', 'ttk', 'tix',
            'constants')
 
 

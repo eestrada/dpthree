@@ -12,9 +12,81 @@ import types
 from dpthree import builtins
 from dpthree.builtins import *
 import random
-from test.support import TESTFN, unlink,  run_unittest, check_warnings
 from operator import neg
 
+try:
+    from test.support import TESTFN, unlink,  run_unittest, check_warnings
+except Exception:
+    import tempfile as _tempfile
+    _ = _tempfile.NamedTemporaryFile(delete=False)
+    TESTFN = _.name
+    _.close()
+
+    from os import unlink
+
+    run_unittest = None
+
+    def _filterwarnings(filters, quiet=False):
+        """Catch the warnings, then check if all the expected
+        warnings have been raised and re-raise unexpected warnings.
+        If 'quiet' is True, only re-raise the unexpected warnings.
+        """
+        # Clear the warning registry of the calling module
+        # in order to re-raise the warnings.
+        frame = sys._getframe(2)
+        registry = frame.f_globals.get('__warningregistry__')
+        if registry:
+            registry.clear()
+        with warnings.catch_warnings(record=True) as w:
+            # Set filter "always" to record all warnings.  Because
+            # test_warnings swap the module, we need to look up in
+            # the sys.modules dictionary.
+            sys.modules['warnings'].simplefilter("always")
+            yield WarningsRecorder(w)
+        # Filter the recorded warnings
+        reraise = list(w)
+        missing = []
+        for msg, cat in filters:
+            seen = False
+            for w in reraise[:]:
+                warning = w.message
+                # Filter out the matching messages
+                if (re.match(msg, str(warning), re.I) and
+                    issubclass(warning.__class__, cat)):
+                    seen = True
+                    reraise.remove(w)
+            if not seen and not quiet:
+                # This filter caught nothing
+                missing.append((msg, cat.__name__))
+        if reraise:
+            raise AssertionError("unhandled warning %s" % reraise[0])
+        if missing:
+            raise AssertionError("filter (%r, %s) did not catch any warning" %
+                                missing[0])
+
+    import contextlib
+    @contextlib.contextmanager
+    def check_warnings(*filters, **kwargs):
+        """Context manager to silence warnings.
+
+        Accept 2-tuples as positional arguments:
+            ("message regexp", WarningCategory)
+
+        Optional argument:
+        - if 'quiet' is True, it does not fail if a filter catches nothing
+            (default True without argument,
+            default False if some filters are defined)
+
+        Without argument, it defaults to:
+            check_warnings(("", Warning), quiet=True)
+        """
+        quiet = kwargs.get('quiet')
+        if not filters:
+            filters = (("", Warning),)
+            # Preserve backward compatibility
+            if quiet is None:
+                quiet = True
+        return _filterwarnings(filters, quiet)
 
 class Squares:
 
@@ -1356,21 +1428,10 @@ class TestSorted(unittest.TestCase):
         data = 'The quick Brown fox Jumped over The lazy Dog'.split()
         self.assertRaises(TypeError, sorted, data, None, lambda x,y: 0)
 
-def test_main(verbose=None):
-    test_classes = (BuiltinTest, TestSorted)
 
-    run_unittest(*test_classes)
-
-    # verify reference counting
-    if verbose and hasattr(sys, "gettotalrefcount"):
-        import gc
-        counts = [None] * 5
-        for i in range(len(counts)):
-            run_unittest(*test_classes)
-            gc.collect()
-            counts[i] = sys.gettotalrefcount()
-        print(counts)
+def test_main(verbosity=None):
+    unittest.main(verbosity=verbosity)
 
 
 if __name__ == "__main__":
-    test_main(verbose=True)
+    test_main(verbosity=2)

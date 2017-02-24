@@ -1,14 +1,20 @@
 VERBOSITY=-vv
 PYVER?=
+VENV=source _venv/bin/activate;
 
 .PHONY: test test2 test3 package clean
 
-test:
+setupdev: clean
+	- python$(PYVER) -m virtualenv _venv
+	- $(VENV) pip install unittest-xml-reporting
+	mkdir -p ./shippable/testresults
+
+test: setupdev
 	@ echo
 	@ python$(PYVER) --version
 	@ echo
-	python$(PYVER) ./test_dpthree.py $(VERBOSITY)
-	python$(PYVER) ./test_builtin.py $(VERBOSITY)
+	$(VENV) python$(PYVER) ./run_tests.py $(VERBOSITY)
+	- $(MAKE) clean
 
 test2:
 	export PYVER=2 && $(MAKE) test
@@ -21,5 +27,5 @@ package:
 	@ exit 1
 
 clean:
-	rm -rf __pycache__/
+	rm -rf __pycache__/ _venv/
 	find . -name "*.py[cod]" -delete

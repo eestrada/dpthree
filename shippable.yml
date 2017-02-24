@@ -5,13 +5,11 @@ env:
     - PYTHON_VERSION=3.4
 
 build:
-#  pre_ci:
-#    - docker pull "python:${PYTHON_VERSION}"
-
   pre_ci_boot:
     image_name: python
     image_tag: "${PYTHON_VERSION}"
     pull: true
 
   ci:
+    - mkdir -p ./shippable/testresults
     - make test

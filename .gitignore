@@ -1,3 +1,6 @@
+# CI/CD artifacts
+shippable/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -7,6 +10,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+_venv/
 env/
 build/
 develop-eggs/

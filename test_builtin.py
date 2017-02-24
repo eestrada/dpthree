@@ -1,4 +1,5 @@
 # Python test set -- built-in functions
+# -*- coding: utf-8 -*-
 
 import platform
 import unittest

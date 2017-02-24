@@ -95,6 +95,12 @@ def _class_warn(return_type, subs=None, name=None, msg=None,
 if PY2:
     # TODO: add '__all__' attribute to homebrew builtins so that star
     # import only duck punches builtins with changed semantics
+
+    # NOTE: fix errors with unicode defaulting to using `ascii` codec.
+    import sys
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
     builtins = types.ModuleType('builtins')
     import __builtin__ as past_builtins
     import future_builtins

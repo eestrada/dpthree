@@ -949,12 +949,12 @@ class BuiltinTest(unittest.TestCase):
         # NB the first 4 lines are also used to test input, below
         fp = open(TESTFN, 'w')
         try:
-            fp.write('1+1\n')
-            fp.write('The quick brown fox jumps over the lazy dog')
-            fp.write('.\n')
-            fp.write('Dear John\n')
-            fp.write('XXX'*100)
-            fp.write('YYY'*100)
+            fp.write(u'1+1\n')
+            fp.write(u'The quick brown fox jumps over the lazy dog')
+            fp.write(u'.\n')
+            fp.write(u'Dear John\n')
+            fp.write(u'XXX'*100)
+            fp.write(u'YYY'*100)
         finally:
             fp.close()
 
@@ -962,12 +962,12 @@ class BuiltinTest(unittest.TestCase):
         self.write_testfile()
         fp = open(TESTFN, 'r')
         try:
-            self.assertEqual(fp.readline(4), '1+1\n')
-            self.assertEqual(fp.readline(), 'The quick brown fox jumps over the lazy dog.\n')
-            self.assertEqual(fp.readline(4), 'Dear')
-            self.assertEqual(fp.readline(100), ' John\n')
-            self.assertEqual(fp.read(300), 'XXX'*100)
-            self.assertEqual(fp.read(1000), 'YYY'*100)
+            self.assertEqual(fp.readline(4), u'1+1\n')
+            self.assertEqual(fp.readline(), u'The quick brown fox jumps over the lazy dog.\n')
+            self.assertEqual(fp.readline(4), u'Dear')
+            self.assertEqual(fp.readline(100), u' John\n')
+            self.assertEqual(fp.read(300), u'XXX'*100)
+            self.assertEqual(fp.read(1000), u'YYY'*100)
         finally:
             fp.close()
         unlink(TESTFN)
@@ -1067,10 +1067,10 @@ class BuiltinTest(unittest.TestCase):
             self.assertRaises(ValueError, input)
 
             sys.stdout = BitBucket()
-            sys.stdin = io.StringIO("NULL\0")
+            sys.stdin = io.StringIO(u"NULL\0")
             self.assertRaises(TypeError, input, 42, 42)
-            sys.stdin = io.StringIO("    'whitespace'")
-            self.assertEqual(input(), "    'whitespace'")
+            sys.stdin = io.StringIO(u"    'whitespace'")
+            self.assertEqual(input(), u"    'whitespace'")
             sys.stdin = io.StringIO()
             self.assertRaises(EOFError, input)
 

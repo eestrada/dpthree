@@ -496,7 +496,8 @@ class BuiltinTest(unittest.TestCase):
         try:
             raise IndexError
         except:
-            self.assertEqual(len(dir(sys.exc_info()[2])), 4)
+            self.assertEqual(len(dir(sys.exc_info()[2])),
+                             4 if dpthree.PY3 else 19)
 
 
     def test_divmod(self):

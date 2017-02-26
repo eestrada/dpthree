@@ -325,7 +325,7 @@ class BuiltinTest(unittest.TestCase):
         def f(): pass
         self.assertTrue(callable(f))
 
-        class C1:
+        class C1(object):
             def meth(self): pass
         self.assertTrue(callable(C1))
         c = C1()

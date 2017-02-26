@@ -1051,10 +1051,14 @@ class BuiltinTest(unittest.TestCase):
                     else:
                         self.assertAlmostEqual(pow(x, y, z), 24.0)
 
-        self.assertAlmostEqual(pow(-1, 0.5), 1j)
-        self.assertAlmostEqual(pow(-1, 1/3), 0.5 + 0.8660254037844386j)
+        if dpthree.PY3:
+            self.assertAlmostEqual(pow(-1, 0.5), 1j)
+            self.assertAlmostEqual(pow(-1, 1/3), 0.5 + 0.8660254037844386j)
+        else:
+            pass  # FIXME: How to deal with this properly for Python 2.x?
 
-        self.assertRaises(ValueError, pow, -1, -2, 3)
+        # NOTE: Python 2 raises a TypeError instead ValueError like Python 3.x
+        self.assertRaises((ValueError, TypeError), pow, -1, -2, 3)
         self.assertRaises(ValueError, pow, 1, 2, 0)
 
         self.assertRaises(TypeError, pow)

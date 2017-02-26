@@ -112,7 +112,7 @@ except Exception:
                 quiet = True
         return _filterwarnings(filters, quiet)
 
-class Squares:
+class Squares(object):
 
     def __init__(self, max):
         self.max = max
@@ -128,7 +128,7 @@ class Squares:
             n += 1
         return self.sofar[i]
 
-class StrSquares:
+class StrSquares(object):
 
     def __init__(self, max):
         self.max = max
@@ -146,7 +146,7 @@ class StrSquares:
             n += 1
         return self.sofar[i]
 
-class BitBucket:
+class BitBucket(object):
     def write(self, line):
         pass
 
@@ -194,12 +194,12 @@ test_conv_sign = [
         (chr(0x200), ValueError),
 ]
 
-class TestFailingBool:
+class TestFailingBool(object):
     def __bool__(self):
         raise RuntimeError
     __nonzero__ = __bool__
 
-class TestFailingIter:
+class TestFailingIter(object):
     def __iter__(self):
         raise RuntimeError
 
@@ -531,7 +531,7 @@ class BuiltinTest(unittest.TestCase):
     def test_general_eval(self):
         # Tests that general mappings can be used for the locals argument
 
-        class M:
+        class M(object):
             "Test mapping interface versus possible calls from eval()."
             def __getitem__(self, key):
                 if key == 'a':
@@ -548,7 +548,7 @@ class BuiltinTest(unittest.TestCase):
         self.assertEqual(eval('globals()', g, m), g)
         self.assertEqual(eval('locals()', g, m), m)
         self.assertRaises(TypeError, eval, 'a', m)
-        class A:
+        class A(object):
             "Non-mapping"
             pass
         m = A()
@@ -574,7 +574,7 @@ class BuiltinTest(unittest.TestCase):
         eval('[locals() for i in (2,3)]', g, d)
         eval('[locals() for i in (2,3)]', g, collections.UserDict())
 
-        class SpreadSheet:
+        class SpreadSheet(object):
             "Sample application showing nested, calculated lookups."
             _cells = {}
             def __setitem__(self, key, formula):
@@ -590,7 +590,7 @@ class BuiltinTest(unittest.TestCase):
 
         # Verify that dir() catches a non-list returned by eval
         # SF bug #1004669
-        class C:
+        class C(object):
             def __getitem__(self, item):
                 raise KeyError(item)
             def keys(self):
@@ -733,11 +733,11 @@ class BuiltinTest(unittest.TestCase):
             self.assertRaises(StopIteration, next, i)
 
     def test_isinstance(self):
-        class C:
+        class C(object):
             pass
         class D(C):
             pass
-        class E:
+        class E(object):
             pass
         c = C()
         d = D()
@@ -751,11 +751,11 @@ class BuiltinTest(unittest.TestCase):
         self.assertRaises(TypeError, isinstance)
 
     def test_issubclass(self):
-        class C:
+        class C(object):
             pass
         class D(C):
             pass
-        class E:
+        class E(object):
             pass
         c = C()
         d = D()
@@ -774,19 +774,20 @@ class BuiltinTest(unittest.TestCase):
         self.assertEqual(len([1, 2, 3, 4]), 4)
         self.assertEqual(len({}), 0)
         self.assertEqual(len({'a':1, 'b': 2}), 2)
-        class BadSeq:
+        class BadSeq(object):
             def __len__(self):
                 raise ValueError
         self.assertRaises(ValueError, len, BadSeq())
-        class InvalidLen:
+        class InvalidLen(object):
             def __len__(self):
                 return None
         self.assertRaises(TypeError, len, InvalidLen())
-        class FloatLen:
+        class FloatLen(object):
             def __len__(self):
                 return 4.5
         self.assertRaises(TypeError, len, FloatLen())
         class HugeLen:
+        class HugeLen(object):
             def __len__(self):
                 return sys.maxsize + 1
         self.assertRaises((OverflowError, TypeError), len, HugeLen())
@@ -844,7 +845,7 @@ class BuiltinTest(unittest.TestCase):
         )
         self.assertRaises(TypeError, map)
         self.assertRaises(TypeError, map, lambda x: x, 42)
-        class BadSeq:
+        class BadSeq(object):
             def __iter__(self):
                 raise ValueError
                 yield None
@@ -900,7 +901,7 @@ class BuiltinTest(unittest.TestCase):
         self.assertRaises(TypeError, min)
         self.assertRaises(TypeError, min, 42)
         self.assertRaises(ValueError, min, ())
-        class BadSeq:
+        class BadSeq(object):
             def __getitem__(self, index):
                 raise ValueError
         self.assertRaises(ValueError, min, BadSeq())
@@ -1186,12 +1187,12 @@ class BuiltinTest(unittest.TestCase):
         self.assertRaises(TypeError, round)
 
         # test generic rounding delegation for reals
-        class TestRound:
+        class TestRound(object):
             def __round__(self):
                 return 23.0
             __float__ = __round__  # NOTE: Python2 does not have `__round__`
 
-        class TestNoRound:
+        class TestNoRound(object):
             pass
 
         self.assertEqual(round(TestRound()), 23)
@@ -1250,7 +1251,7 @@ class BuiltinTest(unittest.TestCase):
         self.assertRaises(TypeError, sum, [{2:3}])
         self.assertRaises(TypeError, sum, [{2:3}]*2, {2:3})
 
-        class BadSeq:
+        class BadSeq(object):
             def __getitem__(self, index):
                 raise ValueError
         self.assertRaises(ValueError, sum, BadSeq())
@@ -1299,7 +1300,7 @@ class BuiltinTest(unittest.TestCase):
         self.assertEqual(list(zip(a, b)), t)
         b = (4, 5, 6, 7)
         self.assertEqual(list(zip(a, b)), t)
-        class I:
+        class I(object):
             def __getitem__(self, i):
                 if i < 0 or i > 2: raise IndexError
                 return i + 4
@@ -1307,7 +1308,7 @@ class BuiltinTest(unittest.TestCase):
         self.assertEqual(list(zip()), [])
         self.assertEqual(list(zip(*[])), [])
         self.assertRaises(TypeError, zip, None)
-        class G:
+        class G(object):
             pass
         self.assertRaises(TypeError, zip, a, G())
         self.assertRaises(RuntimeError, zip, a, TestFailingIter())
@@ -1315,7 +1316,7 @@ class BuiltinTest(unittest.TestCase):
         # Make sure zip doesn't try to allocate a billion elements for the
         # result list when one of its arguments doesn't say how long it is.
         # A MemoryError is the most likely failure mode.
-        class SequenceWithoutALength:
+        class SequenceWithoutALength(object):
             def __getitem__(self, i):
                 if i == 5:
                     raise IndexError
@@ -1326,7 +1327,7 @@ class BuiltinTest(unittest.TestCase):
             list(enumerate(range(5)))
         )
 
-        class BadSeq:
+        class BadSeq(object):
             def __getitem__(self, i):
                 if i == 5:
                     raise ValueError
@@ -1386,7 +1387,7 @@ class BuiltinTest(unittest.TestCase):
         empty_format_spec(None)
 
         # TypeError because self.__format__ returns the wrong type
-        class BadFormatResult:
+        class BadFormatResult(object):
             def __format__(self, format_spec):
                 return 1.0
         self.assertRaises(TypeError, format, BadFormatResult(), "")
@@ -1422,14 +1423,14 @@ class BuiltinTest(unittest.TestCase):
 
         fmt_strs = ['', 's']
 
-        class A:
+        class A(object):
             def __format__(self, fmt_str):
                 return format('', fmt_str)
 
         for fmt_str in fmt_strs:
             test_deprecated_format_string(A(), fmt_str, False)
 
-        class B:
+        class B(object):
             pass
 
         class C(object):

@@ -1,5 +1,10 @@
 # dpthree
 
+[![Run Status](https://api.shippable.com/projects/58afc3c8b1c2a40600ebc14f/badge?branch=master)](https://app.shippable.com/projects/58afc3c8b1c2a40600ebc14f)
+[![Coverage Status](https://api.shippable.com/projects/58afc3c8b1c2a40600ebc14f/coverageBadge?branch=master)](https://app.shippable.com/projects/58afc3c8b1c2a40600ebc14f)
+
+--------------------------------------------------------------------------------
+
 This is a module to deal with the differences between Python 2 and
 Python 3 builtins.
 

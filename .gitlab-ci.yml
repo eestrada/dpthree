@@ -12,7 +12,7 @@ test2.7:
   before_script:
     - python --version  # Print out version for debugging
   script:
-    - make test
+    - make shippable_test
 
 test3.4:
   image: "python:3.4"
@@ -22,7 +22,7 @@ test3.4:
   before_script:
     - python --version  # Print out version for debugging
   script:
-    - make test
+    - make shippable_test
 
 test3.5:
   image: "python:3.5"
@@ -32,7 +32,7 @@ test3.5:
   before_script:
     - python --version  # Print out version for debugging
   script:
-    - make test
+    - make shippable_test
 
 test3.6:
   image: "python:3.6"
@@ -42,4 +42,4 @@ test3.6:
   before_script:
     - python --version  # Print out version for debugging
   script:
-    - make test
+    - make shippable_test

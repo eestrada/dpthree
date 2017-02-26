@@ -96,11 +96,14 @@ if PY2:
     # TODO: add '__all__' attribute to homebrew builtins so that star
     # import only duck punches builtins with changed semantics
 
-    # NOTE: fix errors with unicode defaulting to using `ascii` codec.
+    # NOTE: fixes errors with unicode defaulting to using `ascii` codec.
     import sys
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
+    # TODO: duck punch the builtin `object` type to hide compatibility
+    # issues (e.g., `__bool__` versus `__nonzero__`, `__next__` versus
+    # `next`, etc.). This might be dangerous, but worth a try at least.
     builtins = types.ModuleType('builtins')
     import __builtin__ as past_builtins
     import future_builtins

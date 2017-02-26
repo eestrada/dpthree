@@ -197,6 +197,7 @@ test_conv_sign = [
 class TestFailingBool:
     def __bool__(self):
         raise RuntimeError
+    __nonzero__ = __bool__
 
 class TestFailingIter:
     def __iter__(self):

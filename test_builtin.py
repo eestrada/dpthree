@@ -1444,9 +1444,12 @@ class BuiltinTest(unittest.TestCase):
         class C(object):
             pass
 
-        for cls in [object, B, C]:
-            for fmt_str in fmt_strs:
-                test_deprecated_format_string(cls(), fmt_str, len(fmt_str) != 0)
+        # NOTE: this outright fails or errors after Python 3.
+        # FIXME: add a test for Python 3
+        if dpthree.PY2:
+            for cls in [object, B, C]:
+                for fmt_str in fmt_strs:
+                    test_deprecated_format_string(cls(), fmt_str, len(fmt_str) != 0)
         # --------------------------------------------------------------------
 
         # make sure we can take a subclass of str as a format spec

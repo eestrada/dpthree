@@ -697,10 +697,10 @@ class BuiltinTest(unittest.TestCase):
         self.assertRaises(TypeError, hash, [])
         self.assertRaises(TypeError, hash, {})
         # Bug 1536021: Allow hash to return long objects
-        class X:
+        class X(object):
             def __hash__(self):
                 return 2**100
-        self.assertEqual(type(hash(X())), int)
+        self.assertIsInstance(hash(X()), int)
         class Z(int):
             def __hash__(self):
                 return self

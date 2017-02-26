@@ -55,7 +55,7 @@ def main(args=sys.argv):
 
     final_suite = unittest.TestSuite(all_suites)
     if xmlrunner is not None:
-        with open("./shippable/testresults/xmlrunner_output.xml", mode="wb") as output:
+        with open("./shippable/testresults/results.xml", mode="wb") as output:
             runner = xmlrunner.XMLTestRunner(output=output, verbosity=kwds['verbose'])
             result = runner.run(final_suite)
     else:

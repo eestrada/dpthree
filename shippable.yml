@@ -14,5 +14,4 @@ build:
     pull: true
 
   ci:
-    - mkdir -p ./shippable/testresults
-    - make test
+    - make shippable_test

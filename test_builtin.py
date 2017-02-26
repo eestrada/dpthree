@@ -772,7 +772,7 @@ class BuiltinTest(unittest.TestCase):
         class HugeLen:
             def __len__(self):
                 return sys.maxsize + 1
-        self.assertRaises(OverflowError, len, HugeLen())
+        self.assertRaises((OverflowError, TypeError), len, HugeLen())
         class NoLenMethod(object): pass
         self.assertRaises(TypeError, len, NoLenMethod())
 

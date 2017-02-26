@@ -926,6 +926,7 @@ class BuiltinTest(unittest.TestCase):
                 return self
             def __next__(self):
                 raise StopIteration
+            next = __next__
 
         it = iter(Iter())
         self.assertEqual(next(it, 42), 42)

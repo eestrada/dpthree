@@ -2,7 +2,7 @@ VERBOSITY=-vv
 PYVER?=
 VENV=. _venv/bin/activate;
 
-.PHONY: test test2 test3 package clean
+.PHONY: setupdev test test2 test3 package clean
 
 setupdev: clean
 	- python$(PYVER) -m virtualenv _venv

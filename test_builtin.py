@@ -1124,7 +1124,10 @@ class BuiltinTest(unittest.TestCase):
         # FIXME: rounding to an int seems to be new in Python 3.5.
         # How best to deal with this new behavior? Act like Python 3.5 is the right
         # way? Behave differently for different versions of Python? Something else?
-        self.assertEqual(type(round(0.0)), int)
+        if dpthree.PY3:
+            self.assertEqual(type(round(0.0)), int)
+        else:
+            self.assertNotEqual(type(round(0.0)), int)
 
         self.assertEqual(round(1.0), 1.0)
         self.assertEqual(round(10.0), 10.0)
@@ -1160,19 +1163,22 @@ class BuiltinTest(unittest.TestCase):
         self.assertEqual(type(round(-8.0, 1)), float)
 
         # Check even / odd rounding behaviour
-        self.assertEqual(round(5.5), 6)
-        self.assertEqual(round(6.5), 6)
-        self.assertEqual(round(-5.5), -6)
-        self.assertEqual(round(-6.5), -6)
+        if dpthree.PY3:
+            self.assertEqual(round(5.5), 6)
+            self.assertEqual(round(6.5), 6)
+            self.assertEqual(round(-5.5), -6)
+            self.assertEqual(round(-6.5), -6)
 
         # Check behavior on ints
         self.assertEqual(round(0), 0)
         self.assertEqual(round(8), 8)
         self.assertEqual(round(-8), -8)
-        self.assertEqual(type(round(0)), int)
-        self.assertEqual(type(round(-8, -1)), int)
-        self.assertEqual(type(round(-8, 0)), int)
-        self.assertEqual(type(round(-8, 1)), int)
+
+        if dpthree.PY3:
+            self.assertEqual(type(round(0)), int)
+            self.assertEqual(type(round(-8, -1)), int)
+            self.assertEqual(type(round(-8, 0)), int)
+            self.assertEqual(type(round(-8, 1)), int)
 
         # test new kwargs
         self.assertEqual(round(number=-8.0, ndigits=-1), -10.0)
@@ -1182,7 +1188,8 @@ class BuiltinTest(unittest.TestCase):
         # test generic rounding delegation for reals
         class TestRound:
             def __round__(self):
-                return 23
+                return 23.0
+            __float__ = __round__  # NOTE: Python2 does not have `__round__`
 
         class TestNoRound:
             pass
@@ -1190,12 +1197,14 @@ class BuiltinTest(unittest.TestCase):
         self.assertEqual(round(TestRound()), 23)
 
         self.assertRaises(TypeError, round, 1, 2, 3)
-        self.assertRaises(TypeError, round, TestNoRound())
+        # NOTE: Python 2.x raises AttributeError when
+        # `__float__`/`__round__` is not present.
+        self.assertRaises((AttributeError, TypeError), round, TestNoRound())
 
         t = TestNoRound()
         t.__round__ = lambda *args: args
-        self.assertRaises(TypeError, round, t)
-        self.assertRaises(TypeError, round, t, 0)
+        self.assertRaises((AttributeError, TypeError), round, t)
+        self.assertRaises((AttributeError, TypeError), round, t, 0)
 
     # Some versions of glibc for alpha have a bug that affects
     # float -> integer rounding (floor, ceil, rint, round) for

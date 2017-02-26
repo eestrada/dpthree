@@ -176,6 +176,11 @@ if PY2:
     def __subclasshook__(cls, C):
         return issubclass(C, _past_builtins.bytes)""", vars(builtins))
 
+    exec("""def compile(source, filename, mode, flags=0, dont_inherit=False, optimize=-1, **kwargs):
+    if isinstance(source, memoryview):
+        source = source.tobytes()
+    return _past_builtins.compile(source, filename, mode, flags, dont_inherit, **kwargs)""", vars(builtins))
+
     # TODO: duck punch `itertools.filterfalse` as an alias to `itertools.ifilterfalse`
     # TODO: wrap `itertools.imap`, `itertools.ifilter` and
     # `itertools.ifilterfalse` in a deprecation warning (after making the

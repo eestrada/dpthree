@@ -375,11 +375,15 @@ class BuiltinTest(unittest.TestCase):
         self.assertRaises(TypeError, compile)
         self.assertRaises(ValueError, compile, 'print(42)\n', '<string>', 'badmode')
         self.assertRaises(ValueError, compile, 'print(42)\n', '<string>', 'single', 0xff)
-        self.assertRaises(TypeError, compile, chr(0), 'f', 'exec')
+
+        if sys.version_info.major >= 3 and sys.version_info.minor >= 5:
+            self.assertRaises(ValueError, compile, chr(0), 'f', 'exec')
+        else:
+            self.assertRaises(TypeError, compile, chr(0), 'f', 'exec')
+
         self.assertRaises(TypeError, compile, 'pass', '?', 'exec',
                           mode='eval', source='0', filename='tmp')
         compile('print("\xe5")\n', '', 'exec')
-        self.assertRaises(TypeError, compile, chr(0), 'f', 'exec')
         self.assertRaises(ValueError, compile, str('a = 1'), 'f', 'bad')
 
         # test the optimize argument
@@ -1400,9 +1404,12 @@ class BuiltinTest(unittest.TestCase):
         class C(object):
             pass
 
-        for cls in [object, B, C]:
-            for fmt_str in fmt_strs:
-                test_deprecated_format_string(cls(), fmt_str, len(fmt_str) != 0)
+        # NOTE: this outright fails after Python 3.5 with a TypeError.
+        # FIXME: add a test for Python 3.5
+        if not (sys.version_info.major >= 3 and sys.version_info.minor >= 5):
+            for cls in [object, B, C]:
+                for fmt_str in fmt_strs:
+                    test_deprecated_format_string(cls(), fmt_str, len(fmt_str) != 0)
         # --------------------------------------------------------------------
 
         # make sure we can take a subclass of str as a format spec

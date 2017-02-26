@@ -424,7 +424,8 @@ class BuiltinTest(unittest.TestCase):
                 ns = {}
                 exec(code, ns)
                 rv = ns['f']()
-                self.assertEqual(rv, (debugval, docstring))
+                if dpthree.PY3 or optval <= 0:
+                    self.assertEqual(rv, (debugval, docstring))
 
     def test_delattr(self):
         sys.spam = 1

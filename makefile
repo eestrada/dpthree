@@ -1,10 +1,13 @@
 VERBOSITY=-vv
 PYVER?=
 VENV=. _venv/bin/activate;
+INSTALL_VENV=python -m pip --quiet install virtualenv
+CLEANER_CMD=rm -rf _venv/ __pycache__/ *.pyc  *.pyo  *.pyd
 
 .PHONY: setupdev test test2 test3 package clean
 
 setupdev: clean
+	- if ! $(INSTALL_VENV); then sudo $(INSTALL_VENV); fi
 	- python$(PYVER) -m virtualenv _venv
 	- $(VENV) pip install unittest-xml-reporting
 	mkdir -p ./shippable/testresults
@@ -27,5 +30,4 @@ package:
 	@ exit 1
 
 clean:
-	rm -rf __pycache__/ _venv/
-	find . -name "*.py[cod]" -delete
+	- if ! $(CLEANER_CMD); then sudo $(CLEANER_CMD); fi

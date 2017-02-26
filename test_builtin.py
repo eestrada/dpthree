@@ -785,8 +785,16 @@ class BuiltinTest(unittest.TestCase):
         class FloatLen(object):
             def __len__(self):
                 return 4.5
-        self.assertRaises(TypeError, len, FloatLen())
-        class HugeLen:
+        if dpthree.PY2:
+            # NOTE: The old style Python classes properly raise a TypeError
+            # for this issues, but the new style ones (in Python 2.x) do
+            # not. Instead it truncates it, it seems (which is an odd choice).
+            print(len(FloatLen()), file=sys.stderr)
+            self.assertNotEqual(len(FloatLen()), 4.5)
+            self.assertEqual(len(FloatLen()), 4)
+        else:
+            self.assertRaises(TypeError, len, FloatLen())
+
         class HugeLen(object):
             def __len__(self):
                 return sys.maxsize + 1

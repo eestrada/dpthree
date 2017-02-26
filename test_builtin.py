@@ -674,14 +674,17 @@ class BuiltinTest(unittest.TestCase):
 
         # Check that hasattr propagates all exceptions outside of
         # AttributeError.
-        class A:
+        class A(object):
             def __getattr__(self, what):
                 raise SystemExit
         self.assertRaises(SystemExit, hasattr, A(), "b")
-        class B:
+        class B(object):
             def __getattr__(self, what):
                 raise ValueError
-        self.assertRaises(ValueError, hasattr, B(), "b")
+        if dpthree.PY3:
+            self.assertRaises(ValueError, hasattr, B(), "b")
+        elif dpthree.PY2:
+            self.assertFalse(hasattr(B(), "b"))
 
     def test_hash(self):
         hash(None)

@@ -288,7 +288,9 @@ for _new, _old in _names:
         # also duck punch module module name as a top level name
         sys.modules[_new] = _mod
 
-# module renames
+##################
+# module renames #
+##################
 
 # TODO: change this to a sequence of pairs. Keeping them in sync as two separate
 # sequences is a pain. (Why did I even do this in the first place?!)
@@ -382,3 +384,18 @@ def loadnewnames():
     if PY2:
         for new in _name_map:
             _loadnewname(new)
+
+#######################
+# module duck punches #
+#######################
+
+def _PY2_module_duck_punches():
+    """Duck punch old modules with new attributes they don't yet have."""
+    import collections
+    import UserDict
+
+    collections.UserDict = UserDict.UserDict
+    # TODO: wrap the old `UserDict.UserDict` in a deprecation warning
+
+if PY2:
+    _PY2_module_duck_punches()

@@ -1444,12 +1444,9 @@ class BuiltinTest(unittest.TestCase):
         class C(object):
             pass
 
-        # NOTE: this outright fails after Python 3.5 with a TypeError.
-        # FIXME: add a test for Python 3.5
-        if not (sys.version_info.major >= 3 and sys.version_info.minor >= 5):
-            for cls in [object, B, C]:
-                for fmt_str in fmt_strs:
-                    test_deprecated_format_string(cls(), fmt_str, len(fmt_str) != 0)
+        for cls in [object, B, C]:
+            for fmt_str in fmt_strs:
+                test_deprecated_format_string(cls(), fmt_str, len(fmt_str) != 0)
         # --------------------------------------------------------------------
 
         # make sure we can take a subclass of str as a format spec

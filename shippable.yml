@@ -1,15 +1,22 @@
 language: none
 
 env:
-    - PYTHON_VERSION=2.7
-    - PYTHON_VERSION=3.3
-    - PYTHON_VERSION=3.4
-    - PYTHON_VERSION=3.5
-    - PYTHON_VERSION=3.6
+    - PYTHON_BIN="python" PYTHON_VERSION="2.7"
+    - PYTHON_BIN="python" PYTHON_VERSION="3.3"
+    - PYTHON_BIN="python" PYTHON_VERSION="3.4"
+    - PYTHON_BIN="python" PYTHON_VERSION="3.5"
+    - PYTHON_BIN="python" PYTHON_VERSION="3.6"
+    - PYTHON_BIN="pypy" PYTHON_VERSION="2"
+    - PYTHON_BIN="pypy" PYTHON_VERSION="3"
+
+matrix:
+  allow_failures:
+    - env: PYTHON_BIN="pypy" PYTHON_VERSION="2"
+    - env: PYTHON_BIN="pypy" PYTHON_VERSION="3"
 
 build:
   pre_ci_boot:
-    image_name: python
+    image_name: "${PYTHON_BIN}"
     image_tag: "${PYTHON_VERSION}"
     pull: true
 

@@ -782,25 +782,29 @@ class BuiltinTest(unittest.TestCase):
             def __len__(self):
                 return None
         self.assertRaises(TypeError, len, InvalidLen())
-        class FloatLen(object):
-            def __len__(self):
-                return 4.5
-        if dpthree.PY2:
-            # NOTE: The old style Python classes properly raise a TypeError
-            # for this issues, but the new style ones (in Python 2.x) do
-            # not. Instead it truncates it, it seems (which is an odd choice).
-            print(len(FloatLen()), file=sys.stderr)
-            self.assertNotEqual(len(FloatLen()), 4.5)
-            self.assertEqual(len(FloatLen()), 4)
-        else:
-            self.assertRaises(TypeError, len, FloatLen())
 
         class HugeLen(object):
             def __len__(self):
                 return sys.maxsize + 1
-        self.assertRaises((OverflowError, TypeError), len, HugeLen())
+        self.assertRaises(OverflowError, len, HugeLen())
         class NoLenMethod(object): pass
         self.assertRaises(TypeError, len, NoLenMethod())
+
+    @unittest.skipIf(dpthree.PY2, "test will fail")
+    def test_len_py3(self):
+        class FloatLen(object):
+            def __len__(self):
+                return 4.5
+        # NOTE: The old style Python2 classes and Python3 classes
+        # properly raise a TypeError for this issues, but the new
+        # style Python2 clases do not. Instead it truncates it, it
+        # seems (which is an odd choice).
+        # self.assertNotEqual(len(FloatLen()), 4.5)
+        # self.assertEqual(len(FloatLen()), 4)
+        if dpthree.PY2:
+            print("len(FloatLen()):", len(FloatLen()), file=sys.stderr)
+            print("FloatLen().__len__():", FloatLen().__len__(), file=sys.stderr)
+        self.assertRaises(TypeError, len, FloatLen())
 
     def test_map(self):
         self.assertEqual(
@@ -1066,17 +1070,17 @@ class BuiltinTest(unittest.TestCase):
                     else:
                         self.assertAlmostEqual(pow(x, y, z), 24.0)
 
-        if dpthree.PY3:
-            self.assertAlmostEqual(pow(-1, 0.5), 1j)
-            self.assertAlmostEqual(pow(-1, 1/3), 0.5 + 0.8660254037844386j)
-        else:
-            pass  # FIXME: How to deal with this properly for Python 2.x?
-
-        # NOTE: Python 2 raises a TypeError instead ValueError like Python 3.x
-        self.assertRaises((ValueError, TypeError), pow, -1, -2, 3)
         self.assertRaises(ValueError, pow, 1, 2, 0)
 
         self.assertRaises(TypeError, pow)
+
+    @unittest.skipIf(dpthree.PY2, "test will fail")
+    def test_pow_py3(self):
+        self.assertAlmostEqual(pow(-1, 0.5), 1j)
+        self.assertAlmostEqual(pow(-1, 1/3), 0.5 + 0.8660254037844386j)
+
+        # NOTE: Python 2 raises a TypeError instead ValueError like Python 3.x
+        self.assertRaises(ValueError, pow, -1, -2, 3)
 
     def test_input(self):
         self.write_testfile()
@@ -1130,14 +1134,6 @@ class BuiltinTest(unittest.TestCase):
     def test_round(self):
         self.assertEqual(round(0.0), 0.0)
 
-        # FIXME: rounding to an int seems to be new in Python 3.5.
-        # How best to deal with this new behavior? Act like Python 3.5 is the right
-        # way? Behave differently for different versions of Python? Something else?
-        if dpthree.PY3:
-            self.assertEqual(type(round(0.0)), int)
-        else:
-            self.assertNotEqual(type(round(0.0)), int)
-
         self.assertEqual(round(1.0), 1.0)
         self.assertEqual(round(10.0), 10.0)
         self.assertEqual(round(1000000000.0), 1000000000.0)
@@ -1171,23 +1167,10 @@ class BuiltinTest(unittest.TestCase):
         self.assertEqual(type(round(-8.0, 0)), float)
         self.assertEqual(type(round(-8.0, 1)), float)
 
-        # Check even / odd rounding behaviour
-        if dpthree.PY3:
-            self.assertEqual(round(5.5), 6)
-            self.assertEqual(round(6.5), 6)
-            self.assertEqual(round(-5.5), -6)
-            self.assertEqual(round(-6.5), -6)
-
         # Check behavior on ints
         self.assertEqual(round(0), 0)
         self.assertEqual(round(8), 8)
         self.assertEqual(round(-8), -8)
-
-        if dpthree.PY3:
-            self.assertEqual(type(round(0)), int)
-            self.assertEqual(type(round(-8, -1)), int)
-            self.assertEqual(type(round(-8, 0)), int)
-            self.assertEqual(type(round(-8, 1)), int)
 
         # test new kwargs
         self.assertEqual(round(number=-8.0, ndigits=-1), -10.0)
@@ -1200,20 +1183,39 @@ class BuiltinTest(unittest.TestCase):
                 return 23.0
             __float__ = __round__  # NOTE: Python2 does not have `__round__`
 
+        self.assertEqual(round(TestRound()), 23)
+        self.assertRaises(TypeError, round, 1, 2, 3)
+
+    @unittest.skipIf(dpthree.PY2, "test will fail")
+    def test_round_py3(self):
+        # FIXME: rounding to an int seems to be new in Python 3.
+        # How best to deal with this new behavior? Act like Python 3 is the right
+        # way? Behave differently for different versions of Python? Something else?
+        self.assertEqual(type(round(0.0)), int)
+
+        # Check even / odd rounding behaviour
+        self.assertEqual(round(5.5), 6)
+        self.assertEqual(round(6.5), 6)
+        self.assertEqual(round(-5.5), -6)
+        self.assertEqual(round(-6.5), -6)
+
+        # Check behavior on ints
+        self.assertEqual(type(round(0)), int)
+        self.assertEqual(type(round(-8, -1)), int)
+        self.assertEqual(type(round(-8, 0)), int)
+        self.assertEqual(type(round(-8, 1)), int)
+
         class TestNoRound(object):
             pass
 
-        self.assertEqual(round(TestRound()), 23)
-
-        self.assertRaises(TypeError, round, 1, 2, 3)
         # NOTE: Python 2.x raises AttributeError when
         # `__float__`/`__round__` is not present.
-        self.assertRaises((AttributeError, TypeError), round, TestNoRound())
+        self.assertRaises(TypeError, round, TestNoRound())
 
         t = TestNoRound()
         t.__round__ = lambda *args: args
-        self.assertRaises((AttributeError, TypeError), round, t)
-        self.assertRaises((AttributeError, TypeError), round, t, 0)
+        self.assertRaises(TypeError, round, t)
+        self.assertRaises(TypeError, round, t, 0)
 
     # Some versions of glibc for alpha have a bug that affects
     # float -> integer rounding (floor, ceil, rint, round) for

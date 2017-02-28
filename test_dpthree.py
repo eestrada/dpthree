@@ -89,27 +89,6 @@ class Test_dpthree(unittest.TestCase):
         with self.assertRaises(TypeError):
             removed.basestring(key='value')
 
-    @unittest.skipIf(not dpthree.PY2, "Test is only relevant in Python 2")
-    def test_new_int(self):
-        # duck punched int type inherits from Python 2 long type
-        self.assertIsInstance(builtins.int(), long)
-
-        self.assertEqual(builtins.int(), 0)
-
-        self.assertEqual(builtins.int(1), 1.0)
-
-        with self.assertRaises(ValueError):
-            builtins.int('1L')
-
-        with self.assertRaises(TypeError):
-            builtins.int(1, base=10)
-
-        with self.assertRaises(TypeError):
-            builtins.int(1, 10)
-
-        with self.assertRaises(TypeError):
-            builtins.int(1, None)
-
     def test_inheritance(self):
         self.assertIsInstance(removed.unicode(u'unicode'), builtins.str)
         self.assertIsInstance(u'unicode string', removed.unicode)
@@ -136,17 +115,37 @@ class Test_dpthree(unittest.TestCase):
 
         self.assertEqual(builtins.bytes.__name__, 'bytes')
 
-    @unittest.skipIf(not dpthree.PY2, "Test is only relevant in Python 2")
-    def test_names2(self):
-        self.assertEqual(builtins.str.__name__, 'unicode')
-        self.assertEqual(builtins.range.__name__, 'xrange')
-        self.assertEqual(builtins.chr.__name__, 'unichr')
+    if dpthree.PY2:
+        def test_new_int(self):
+            # duck punched int type inherits from Python 2 long type
+            self.assertIsInstance(builtins.int(), long)
 
-    @unittest.skipIf(not dpthree.PY3, "Test is only relevant in Python 3")
-    def test_names3(self):
-        self.assertEqual(builtins.str.__name__, 'str')
-        self.assertEqual(builtins.range.__name__, 'range')
-        self.assertEqual(builtins.chr.__name__, 'chr')
+            self.assertEqual(builtins.int(), 0)
+
+            self.assertEqual(builtins.int(1), 1.0)
+
+            with self.assertRaises(ValueError):
+                builtins.int('1L')
+
+            with self.assertRaises(TypeError):
+                builtins.int(1, base=10)
+
+            with self.assertRaises(TypeError):
+                builtins.int(1, 10)
+
+            with self.assertRaises(TypeError):
+                builtins.int(1, None)
+
+        def test_names2(self):
+            self.assertEqual(builtins.str.__name__, 'unicode')
+            self.assertEqual(builtins.range.__name__, 'xrange')
+            self.assertEqual(builtins.chr.__name__, 'unichr')
+
+    if dpthree.PY3:
+        def test_names3(self):
+            self.assertEqual(builtins.str.__name__, 'str')
+            self.assertEqual(builtins.range.__name__, 'range')
+            self.assertEqual(builtins.chr.__name__, 'chr')
 
     def tearDown(self):
         self.catcher.__exit__(None, None, None)

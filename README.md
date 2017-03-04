@@ -33,8 +33,9 @@ support for Python 2.x
 
 Another option is `python-future` from PythonCharmers. This _is_
 idiomatic Python. When you use this package your code still looks
-largely like vanilla python code and runs more or less as
-expected. However, it has the issue that it is a multi-file install
+largely like vanilla python code and runs more or less as expected. A
+few lines of boilerplate at the top of a file are often all that is
+needed. However, it has the issue that it is a multi-file install
 which places files _outside_ its primary package hierarchy. So, for
 instance modules like `Tkinter` which have a changed name in Python 3,
 now get explicity installed as `tkinter` in the top of the global module file hierarchy. In

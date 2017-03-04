@@ -42,7 +42,7 @@ some ways this is good: it uses the builtin `import` mechanisms to deal
 with these packages. However, it also makes it unclear where stuff
 lives and it means you pretty much _must_ be installing at the system
 scope or have a `virtualenv` that you are installing into.  This just
-doesn't jive well with some project structures. So the idea is good
+doesn't jibe well with some project structures. So the idea is good
 in theory, but crippled in practice. If you code base fits this
 structure, then awesome! `python-future` is for you. If not, sorry,
 move along.

@@ -1,7 +1,7 @@
 # dpthree
 
-[![Run Status](https://api.shippable.com/projects/58afc3c8b1c2a40600ebc14f/badge?branch=master)](https://app.shippable.com/projects/58afc3c8b1c2a40600ebc14f)
-[![Coverage Status](https://api.shippable.com/projects/58afc3c8b1c2a40600ebc14f/coverageBadge?branch=master)](https://app.shippable.com/projects/58afc3c8b1c2a40600ebc14f)
+[![Run Status](https://api.shippable.com/projects/58c500d537380a0800de7071/badge?branch=master)](https://app.shippable.com/github/eestrada/dpthree)
+[![Coverage Badge](https://api.shippable.com/projects/58c500d537380a0800de7071/coverageBadge?branch=master)](https://app.shippable.com/github/eestrada/dpthree)
 
 --------------------------------------------------------------------------------
 

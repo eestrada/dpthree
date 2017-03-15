@@ -1,4 +1,4 @@
-VERBOSITY=-vv
+VERBOSITY?=-vv
 PYBIN_WITH_VER?=python2
 VENV=. _venv/bin/activate;
 INSTALL_VENV=pip --quiet install virtualenv

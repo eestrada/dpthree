@@ -30,7 +30,7 @@ coverage:
 	$(VENV) $(PYTHON_BIN)$(PYTHON_VERSION) -m coverage run --timid --branch --omit="_venv/*" ./run_tests.py $(VERBOSITY)
 	$(VENV) $(PYTHON_BIN)$(PYTHON_VERSION) -m coverage xml -o ./shippable/codecoverage/coverage.xml ./run_tests.py
 
-shippable_test: setupdev test coverage
+shippable_test: setupdev coverage test
 
 package:
 	@ echo "Not implemented yet..."

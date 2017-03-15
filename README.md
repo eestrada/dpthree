@@ -63,7 +63,9 @@ sometimes called Monkey Patching.
 The module is generally intended to be imported with a star import,
 like this:
 
-    from dpthree.builtins import *
+```python
+from dpthree.builtins import *
+```
 
 When imported this way, it will override builtin callables that have
 different behaviour in Python 3. It also imports some callables that
@@ -76,21 +78,21 @@ based on the warning level used). This should better help you discover
 edge cases in your code base that still use deprecated and/or removed
 features.
 
-Removals to be made aware of:
+A few key removals to be made aware of:
 
-`xrange` has been removed in Python 3. Well, sort of; `xrange` is
+* `xrange` has been removed in Python 3. Well, sort of; `xrange` is
 replaced with `range`, but with some increased functionality. For
-instance, in Python 3, `range` objects can be larger than sys.maxsize.
+instance, in Python 3, `range` objects can be larger than `sys.maxsize`.
 
-`unicode` has been removed in Python 3. Well, again, sort of. `str` in
+* `unicode` has been removed in Python 3. Well, again, sort of. `str` in
 Python 3 is more or less what `unicode` was in Python 2.
 
-`reduce` has been moved to the functools module in Python 3. In
+* `reduce` has been moved to the functools module in Python 3. In
 `dpthree`, it can still be made available in the global `builtins`
 space, but is now wrapped in a `DeprecationWarning` to help you find
 any uses of it in your codebase. If `reduce` is used as part of the
-`functools` module, it has no such `DeprecationWarning` raised.
+`functools` module however, it has no such `DeprecationWarning` raised.
 
-`basestring` has been removed in Python 3 because `str` and `bytes` do
+* `basestring` has been removed in Python 3 because `str` and `bytes` do
 not share a common parent anymore. Use `isinstance(obj, (str, bytes))`
 instead.

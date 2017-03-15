@@ -25,6 +25,12 @@ test2:
 test3:
 	export PYBIN_WITH_VER=python3 && $(MAKE) setupdev && $(MAKE) test
 
+test_pypy2:
+	export PYBIN_WITH_VER=pypy && $(MAKE) setupdev && $(MAKE) test
+
+test_pypy3:
+	export PYBIN_WITH_VER=pypy3 && $(MAKE) setupdev && $(MAKE) test
+
 coverage:
 	- $(VENV) $(PYBIN_WITH_VER) -m coverage run --timid --branch --omit="_venv/*" ./run_tests.py $(VERBOSITY)
 	$(VENV) $(PYBIN_WITH_VER) -m coverage xml -o ./shippable/codecoverage/coverage.xml ./run_tests.py

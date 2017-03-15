@@ -27,7 +27,7 @@ test3:
 	export PYTHON_VERSION=3 && $(MAKE) setupdev && $(MAKE) test
 
 coverage:
-	$(VENV) $(PYTHON_BIN)$(PYTHON_VERSION) -m coverage run --timid --branch --omit="_venv/*" ./run_tests.py $(VERBOSITY)
+	- $(VENV) $(PYTHON_BIN)$(PYTHON_VERSION) -m coverage run --timid --branch --omit="_venv/*" ./run_tests.py $(VERBOSITY)
 	$(VENV) $(PYTHON_BIN)$(PYTHON_VERSION) -m coverage xml -o ./shippable/codecoverage/coverage.xml ./run_tests.py
 
 shippable_test: setupdev coverage test

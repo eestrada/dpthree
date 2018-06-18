@@ -1,7 +1,6 @@
 # dpthree
 
-[![Run Status](https://api.shippable.com/projects/58c500d537380a0800de7071/badge?branch=master)](https://app.shippable.com/github/eestrada/dpthree)
-[![Coverage Badge](https://api.shippable.com/projects/58c500d537380a0800de7071/coverageBadge?branch=master)](https://app.shippable.com/github/eestrada/dpthree)
+    TODO: Add some sweet Gitlab CI badges here.
 
 --------------------------------------------------------------------------------
 

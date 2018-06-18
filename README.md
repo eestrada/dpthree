@@ -96,3 +96,10 @@ any uses of it in your codebase. If `reduce` is used as part of the
 * `basestring` has been removed in Python 3 because `str` and `bytes` do
 not share a common parent anymore. Use `isinstance(obj, (str, bytes))`
 instead.
+
+## License/Copyright/Copying
+
+Unless otherwise noted, this code is made available under the
+[UNLICENSE](https://unlicense.org/), a public domain dedication with fallback
+[copyfree](http://copyfree.org/) license terms for places where public domain
+is not usable.
